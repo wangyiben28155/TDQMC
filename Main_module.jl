@@ -15,11 +15,11 @@ end
 
 
 @kwdef struct Parameter{T<:AbstractFloat}
-
+    
 
 end
  
-
+include("Numerical_Diff_DiscreteFuc.jl")
 include("Potential.jl")
 include("")
 include("")
