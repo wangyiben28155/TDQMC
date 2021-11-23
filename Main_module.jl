@@ -1,6 +1,6 @@
 module TDQMC
 
-export wq
+export Three
 
 using Distributions
 import Base.@kwdef
@@ -21,10 +21,10 @@ end
  
 include("Numerical_Diff_DiscreteFunc.jl")
 include("Potential.jl")
-include("")
-include("")
-include("")
-include("")
+# include("")
+# include("")
+# include("")
+# include("")
 
 
 
