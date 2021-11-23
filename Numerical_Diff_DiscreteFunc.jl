@@ -28,10 +28,6 @@ function Three_Point(x::Vector{T}, y::Vector{T}; dL = Parameter.dx) where {T<:Ab
     J = [[1, 2, 3]; vcat([[i, i + 2] for i = 1:num-2]...); [num - 2, num - 1, num]]
     Transform_Matrix = sparse(I, J, V)
 
-
-
-
-
     derivative_numrical_func = coefficient .* (Transform_Matrix * y)
 
     return x, derivative_numrical_func

@@ -19,7 +19,7 @@ end
 
 end
  
-include("Numerical_Diff_DiscreteFuc.jl")
+include("Numerical_Diff_DiscreteFunc.jl")
 include("Potential.jl")
 include("")
 include("")
