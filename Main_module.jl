@@ -19,7 +19,7 @@ end
 
 end
  
-include("Numerical_Diff_DiscreteFunc.jl")
+include("Numerical_Diff_DiscreteFunc.jl")      #用来做数值微分的函数, 对离散函数(不知道解析表达式的波函数进行求解)
 include("Potential.jl")
 # include("")
 # include("")
