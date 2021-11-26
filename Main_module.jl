@@ -10,7 +10,7 @@ const L, x_num, step_t = (350.0, 1751, 13001)
 const μ, σ = (0, 30)
 
 
-function generate_distribution(; x::Int = 1)
+function generate_distribution(x::Int)
     Random.seed!(x)                                             #确定下一次使用rand函数的撒点是固定的, 每次调用程序也能保证下面的分布是确定的
     Initial_Distriution = rand(Normal(μ, σ), Ensemble_num)      #将确定的撒点分布储存起来, 用于下面实例化的赋值
 
@@ -19,7 +19,7 @@ end
 
 @kwdef mutable struct Dynamics{T<:AbstractFloat}
     Guide_Wave::Vector{Complex{T}} = complex(sqrt.(pdf(Normal(μ, σ), LinRange(-L, L, x_num))))#这里得到的分布是概率密度的开平方作为初始的波函数进行演化
-    Trajectory::Matrix{T} = hcat([generate_distribution(x = i) for i in 1:Electron_num]...)            #先给定一个初始的轨迹分布,目前只是计算氢原子的情况,所以先只使用向量保存当前时刻的位置信息
+    Trajectory::Matrix{T} = hcat(generate_distribution.(1:Electron_num))            #先给定一个初始的轨迹分布,目前只是计算氢原子的情况,所以先只使用向量保存当前时刻的位置信息
     Time::Union{T,Complex{T}} = 0.0
 end
 
