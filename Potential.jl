@@ -7,7 +7,7 @@ using SparseArrays
 
 const ω_0 = 0.148
 
-V_0(x::T; α::T = 1.0) where T<:AbstractFloat = -1.0/sqrt(α+x^2)                                             #软核势,之后势能项还需要
+V_0(x::T; α::T = 1.0) where T<:AbstractFloat = -2.0/sqrt(α+x^2)                                             #软核势,之后势能项还需要
 
 Envelope(t::T; T_0::T = 2pi/ω_0, ξ_0::T = 0.1) where T <:AbstractFloat = t<=3*T_0 ? ξ_0 * sin(pi*t/(6*T_0))^2 : ξ_0         
 E(t::T; ϵ::Function =  Envelope , ω::T = ω_0) where T<:AbstractFloat = ϵ(t) * sin(ω*t)                      #定义电场
@@ -24,7 +24,7 @@ function V_0_Matrix(P::Parameter ; V::Function = V_0)                           
     return sparse(1:P.N, 1:P.N, V_operator)
 end
 
-function V_Matrix(P::Parameter, Wave::wave_function; V::Function = Operator)
+function V_Matrix(P::Parameter, Wave::Dynamics; V::Function = Operator)
     local V_operator =@. exp(-1im * P.Δt * V(P.sampling, Wave.Time))                                        #这里势能项是与时间有关的,所以需要引入Wave.Time
     
     return sparse(1:P.N, 1:P.N, V_operator)
