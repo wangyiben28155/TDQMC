@@ -47,7 +47,7 @@ function Five_Point(x::Vector{T}, y::Vector{<:Union{Complex{T},T}}; dL = Paramet
 
     V = [repeat(Section_1, outer = 2); repeat(Section_2, outer = num - 4); repeat(-reverse(Section_1), outer = 2)]
     I = [repeat([1, 2], inner = 5); repeat(collect(3:num-2), inner = 4); repeat([num - 1, num], inner = 5)]
-    J = [collect(1:5); collect(2:6); vcat([[1, 2, 4, 5] .+ i for i = 0:num-5]...); collect(num-5:num-1); collect(num-4:num)]
+    J = [collect(1:5); collect(2:6); repeat([1,2,4,5], outer = num-4) .+ repeat(collect(0:num-5), inner = 4); collect(num-5:num-1); collect(num-4:num)]
 
     Transform_Matrix = sparse(I, J, V)
 
@@ -71,7 +71,8 @@ function Derivative_2(x::Vector{T}, y::Vector{<:Union{Complex{T},T}}; dL = Param
 
     V = [Section_1; Section_2; repeat(Section_3, outer = num - 4); reverse(Section_2); reverse(Section_1)]
     I = repeat(collect(1:num), inner = 5)
-    J = [repeat(collect(1:5), outer = 2); vcat([collect(1:5) .+ i for i = 0:num-5]...); repeat(collect(num-4:num), outer = 2)]
+    J = [repeat(collect(1:5), outer = 2);  repeat(collect(1:5), outer = num - 4) .+ repeat(collect(0:num-5), inner = 5);
+                                                                             repeat(collect(num-4:num), outer = 2)]
 
     Transform_Matrix = sparse(I, J, V)
 
