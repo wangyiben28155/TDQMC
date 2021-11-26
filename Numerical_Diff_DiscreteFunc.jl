@@ -71,8 +71,7 @@ function Derivative_2(x::Vector{T}, y::Vector{<:Union{Complex{T},T}}; dL = Param
 
     V = [Section_1; Section_2; repeat(Section_3, outer = num - 4); reverse(Section_2); reverse(Section_1)]
     I = repeat(collect(1:num), inner = 5)
-    J = [repeat(collect(1:5), outer = 2);  repeat(collect(1:5), outer = num - 4) .+ repeat(collect(0:num-5), inner = 5);
-                                                                             repeat(collect(num-4:num), outer = 2)]
+    J = [repeat(collect(1:5), outer = 2);  repeat(collect(1:5), outer = num - 4) .+ repeat(collect(0:num-5), inner = 5); repeat(collect(num-4:num), outer = 2)]
 
     Transform_Matrix = sparse(I, J, V)
 
