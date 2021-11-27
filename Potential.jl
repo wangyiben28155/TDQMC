@@ -8,15 +8,15 @@ using SparseArrays
 const ω_0 = 0.148
 
 V_ne(x::T; α::T = 1.0) where T<:AbstractFloat = -2.0/sqrt(α+x^2)       #定义势能项
-v_ee(x::T, ; β::T = 1.0) where T<:AbstractFloat = 1.0/sqrt(β+(x-y)^2 )
+v_ee(x::Vector{T}, x_t::T; β::T = 1.0) where T<:AbstractFloat = 1.0/sqrt(β+(x-x_t)^2 )
 
 
 Envelope(t::T; T_0::T = 2pi/ω_0, ξ_0::T = 0.1) where T <:AbstractFloat = t<=3*T_0 ? ξ_0 * sin(pi*t/(6*T_0))^2 : ξ_0         
-E(t::T; ϵ::Function =  Envelope , ω::T = ω_0) where T<:AbstractFloat = ϵ(t) * sin(ω*t)                      #定义电场
+E(t::T; ϵ::Function =  Envelope , ω::T = ω_0) where T<:AbstractFloat = ϵ(t) * sin(ω*t)                   #定义电场
 
 
-
-Operator(x::T,t::T) where T<:AbstractFloat = V_0(x) - x*E(t)
+ 
+Operator(x::T,t::T) where T<:AbstractFloat = V_0(x) - x*E(t)              #自由演化的话可以不加电场
 
 
 end
