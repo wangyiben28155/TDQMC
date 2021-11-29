@@ -12,10 +12,10 @@ const μ, σ = (0, 30)
 
 function Initializer_GuideWave()                                #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
     local A = complex(sqrt.(pdf(Normal(μ, σ), LinRange(-L, L, x_num))))
-    local B:: Array{eltype(A),3} = zeros(eltype(A), (length(A), Ensemble_num, Electron_num))
+    local B:: Array{eltype(A),3} = zeros(eltype(A), (length(A), Electron_num, Ensemble_num))
 
-    for i in 1:Ensemble_num, j in 1:Electron_num
-        @inbounds B[:,i,j] = A
+    for i = 1:Electron_num, j = 1:Ensemble_num
+        @inbounds B[:, i, j] = A
     end
 
     return B
@@ -36,6 +36,7 @@ end
 
 
 @kwdef struct Parameter{T<:AbstractFloat}                        #用来控制计算参数的
+    Electron::Int64 = Electron_num
     particle::Int64 = Ensemble_num
     space_N::Int64 = x_num                                       #划分的格点的总数,后面做离散傅里叶变换的时候会用得到
     scope::T = L                                                 #确定波函数的计算范围为-scope到+scope
@@ -49,7 +50,7 @@ end
 include("Numerical_Diff_DiscreteFunc.jl")      #用来做数值微分的函数, 对离散函数(不知道解析表达式的波函数进行求解)
 include("Potential.jl")
 include("Physical_quantity.jl")
-# include("")
+include("Crank_Nicolson.jl")
 # include("")
 # include("")
 

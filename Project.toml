@@ -1,6 +1,7 @@
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Molly = "aa0f7f06-fcc0-5ec4-a7f3-a573f33f9c4c"
 NumericalAnalysis = "fb18ad0a-c577-441c-b4b0-b42a431f6d4f"
 NumericalIntegration = "e7bfaba1-d571-5449-8927-abc22e82249b"
