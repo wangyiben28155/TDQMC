@@ -21,7 +21,7 @@ end
 
 
 function Crank_Evolution(Wave::Vector{T}) where T<:AbstractFloat
-    local 
+    local A
 
 
 
