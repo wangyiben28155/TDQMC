@@ -14,7 +14,7 @@ function Dimension_Judge(x::AbstractArray, y::AbstractArray)
 end
 
 function Three_Point(x::Vector{T}, y::Vector{<:Union{Complex{T},T}}; dL = Parameter.Δx) where {T<:AbstractFloat}   #在程序中我们的空间步长都是一致的
-    local coefficient = 1 / (2 * dL)
+    local coefficient = 1.0 / (2.0 * dL)
     local num = length(x)
     local derivative_numrical_func = zeros(eltype(y), num)
     local Transform_Matrix::SparseMatrixCSC = spzeros(T, num, num)
@@ -35,7 +35,7 @@ function Three_Point(x::Vector{T}, y::Vector{<:Union{Complex{T},T}}; dL = Parame
 end
 
 function Five_Point(x::Vector{T}, y::Vector{<:Union{Complex{T},T}}; dL = Parameter.Δx) where {T<:AbstractFloat}        #五步法计算一阶导数
-    local coefficient = 1 / (12 * dL)
+    local coefficient = 1.0 / (12.0 * dL)
     local num = length(x)
     local derivative_numrical_func = zeros(eltype(y), num)
     local Transform_Matrix::SparseMatrixCSC = spzeros(T, num, num)

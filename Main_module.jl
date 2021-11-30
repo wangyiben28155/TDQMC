@@ -51,7 +51,7 @@ include("Numerical_Diff_DiscreteFunc.jl")      #用来做数值微分的函数, 
 include("Potential.jl")
 include("Physical_quantity.jl")
 include("Crank_Nicolson.jl")
-# include("")
+include("Trajectory.jl")
 # include("")
 
 
