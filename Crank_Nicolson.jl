@@ -33,8 +33,8 @@ end
 function Reset_matrix!(P::Parameter, Dy::Dynamics, serial_num::Int,        #这个函数主要用来赋值
     Change_matrix_former::Vector{T}, Change_matrix_later::Vector{T}) where {T<:SparseMatrixCSC}
 
-    Change_matrix_former = ChangePart_Matrix(P, Dy, serial_num)
-    Change_matrix_later = -deepcopy(Change_matrix_former)
+    Change_matrix_former[:] = ChangePart_Matrix(P, Dy, serial_num)
+    Change_matrix_later[:] = -deepcopy(Change_matrix_former)
 end
 
 
@@ -53,8 +53,8 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int)         #计
         Reset_matrix!(P, Dy, serial_num, Change_matrix_former, Change_matrix_later)
         Construct_matrix!(P, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
     
-        Dy.Guide_Wave = Change_matrix_former .* Dy.Guide_Wave
-        Dy.Guide_Wave = Change_matrix_later .\ Dy.Guide_Wave
+        Dy.Guide_Wave[:] = Change_matrix_former .* Dy.Guide_Wave
+        Dy.Guide_Wave[:] = Change_matrix_later .\ Dy.Guide_Wave
 
         Dy.Time += P.Δt
     end

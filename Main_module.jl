@@ -28,25 +28,25 @@ end
 
 @kwdef mutable struct Dynamics{T<:AbstractFloat}
     Guide_Wave::Matrix{Vector{Complex{T}}} = Initializer_GuideWave()                          #这里得到的分布是概率密度的开平方作为初始的波函数
-                                                                                              #进行演化  
+    #进行演化  
     Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)                   #先给定一个初始的轨迹分布,目前只是计算氢原子的情况,所以
-                                                                                              #先只使用向量保存当前时刻的位置信息, 并且之后代表不同电
-                                                                                              #子之间粒子的位置之间的运算会有矢量化运算,所以将其放在列#坐标加快运算
+    Slater_Determinant::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))           #先只使用向量保存当前时刻的位置信息, 并且之后代表不同电
+    Slater_Determinant_Dericative::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))#子之间粒子的位置之间的运算会有矢量化运算,所以将其放在列
+    #坐标加快运算
     Time::Union{T,Complex{T}} = 0.0
 end
 
 
-@kwdef struct Parameter{T<:AbstractFloat}                        #用来控制计算参数的
-    electron::Int64 = Electron_num
-    Normalized::T = 1.0 / sqrt(factorial(electron))
-    particle::Int64 = Ensemble_num
-    space_N::Int64 = x_num                                       #划分的格点的总数,后面做离散傅里叶变换的时候会用得到
-    scope::T = L                                                 #确定波函数的计算范围为-scope到+scope
-    Δx::T = 2 * scope / (N - 1)                                  #波函数的离散的空间间隔
-    Square_Δx::T = 2 * (P.Δx)^2
-    sampling::Vector{T} = collect(LinRange(-scope, scope, space_N))
-    Δt::Union{T,Complex{T}} = 0.05                               #划分的时间间隔, 尝试时间迭代区间, 因为考虑到虚时演化, 所以类型设定为复数
-    step_t::Int64 = step_t
+@kwdef struct Parameter{T1<:AbstractFloat,T2<:Integer}                        #用来控制计算参数的
+    electron::T2 = Electron_num
+    particle::T2 = Ensemble_num
+    space_N::T2 = x_num                                       #划分的格点的总数,后面做离散傅里叶变换的时候会用得到
+    scope::T1 = L                                                 #确定波函数的计算范围为-scope到+scope
+    Δx::T1 = 2 * scope / (N - 1)                                  #波函数的离散的空间间隔
+    Square_Δx::T1 = 2 * (P.Δx)^2
+    sampling::Vector{T1} = collect(LinRange(-scope, scope, space_N))
+    Δt::Union{T1,Complex{T1}} = 0.05                               #划分的时间间隔, 尝试时间迭代区间, 因为考虑到虚时演化, 所以类型设定为复数
+    step_t::T2 = step_t
 end
 
 include("Numerical_Diff_DiscreteFunc.jl")                        #用来做数值微分的函数, 对离散函数(不知道解析表达式的波函数进行求解)
