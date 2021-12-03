@@ -27,10 +27,9 @@ function Three_Point(y::Vector{<:Union{Complex{T},T}}; dL::T) where {T<:Abstract
     return derivative_numrical_func
 end
 
-function Five_Point(y::Vector{<:Union{Complex{T},T}}; dL::T) where {T<:AbstractFloat}        #五步法计算一阶导数
+function Five_Point!(y::Vector{<:Union{Complex{T},T}}; dL::T) where {T<:AbstractFloat}        #五步法计算一阶导数
     local coefficient = 1.0 / (12.0 * dL)
     local num = length(y)
-    local derivative_numrical_func = zeros(eltype(y), num)
     local Transform_Matrix::SparseMatrixCSC = spzeros(T, num, num)
     local Section_1 = [-25.0, 48.0, -36.0, 16.0, -3.0]
     local Section_2 = [1.0, -8.0, 8.0, -1.0]
@@ -44,9 +43,9 @@ function Five_Point(y::Vector{<:Union{Complex{T},T}}; dL::T) where {T<:AbstractF
 
     Transform_Matrix = sparse(I, J, V)
 
-    derivative_numrical_func = coefficient .* (Transform_Matrix * y)
+    y[:] = coefficient .* (Transform_Matrix * y)
 
-    return derivative_numrical_func
+    return y
 end
 
 
