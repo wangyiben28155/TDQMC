@@ -12,7 +12,7 @@ const μ, σ = (0, 30)
 
 function Initializer_GuideWave()                                           #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
     local A = complex(sqrt.(pdf(Normal(μ, σ), LinRange(-L, L, x_num))))
-    local B::Array{eltype(A),3} = zeros(eltype(A), (length(A), Electron_num, Ensemble_num))
+    local B::Matrix{<:Vector}
 
     B = fill(A, (Electron_num, Ensemble_num))
 
@@ -27,7 +27,7 @@ function generate_distribution(x::Int)
 end
 
 @kwdef mutable struct Dynamics{T<:AbstractFloat}
-    Guide_Wave::Matrix{Vector{Complex{T}}} = Initializer_GuideWave()                          #这里得到的分布是概率密度的开平方作为初始的波函数
+    Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = Initializer_GuideWave()                          #这里得到的分布是概率密度的开平方作为初始的波函数
     #进行演化  
     Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)                   #先给定一个初始的轨迹分布,目前只是计算氢原子的情况,所以
     Slater_Determinant::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))           #先只使用向量保存当前时刻的位置信息, 并且之后代表不同电
@@ -50,11 +50,12 @@ end
 end
 
 include("Numerical_Diff_DiscreteFunc.jl")                        #用来做数值微分的函数, 对离散函数(不知道解析表达式的波函数进行求解)
+include("Find_nearest.jl")
 include("Potential.jl")
 include("Physical_quantity.jl")
 include("Crank_Nicolson.jl")
 include("Trajectory.jl")
-# include("")
+
 
 
 

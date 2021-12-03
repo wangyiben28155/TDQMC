@@ -1,6 +1,6 @@
 module Find_nearest_k
 
-export find_eg_index
+export find_k_index
 
 
 function find_eg_index(target::T; x::Vector{T}) where {T<:Number}                #这里x为从小到大排序好的数组
@@ -44,7 +44,7 @@ function find_closest_index(target::T; x::Vector{T}) where {T<:Number}
 end
 
 function get_ele(x::Vector{T}, index::Integer) where {T<:Number}
-    if index < 1 | index > length(x)
+    if index < 1 || index > length(x)
         return Inf
     else
         return x[index]
@@ -52,7 +52,7 @@ function get_ele(x::Vector{T}, index::Integer) where {T<:Number}
 end
 
 
-function find_closet_ele(target::T1; x::Vector{T1}, k::T2) where {T1<:Number,T2<:Integer}       #找到最接近得k个元素,并返回一个索引的数组
+function find_k_index(target::T1; x::Vector{T1}, k::T2) where {T1<:Number,T2<:Integer}       #找到最接近得k个元素,并返回一个索引的数组
     local k_index::Vector{T2} = zeros(T2, k)
     local closest_index::T2 = find_closest_index(target, x = x)
     local left_index = closest_index - 1
@@ -60,19 +60,19 @@ function find_closet_ele(target::T1; x::Vector{T1}, k::T2) where {T1<:Number,T2<
 
     k_index[1] = closest_index
 
-    for i in 2:k
-        if target - get_ele(x, left_index) <= get_ele(x, left_index) - target
+    for i = 2:k
+        if abs(target - get_ele(x, left_index)) <= abs(get_ele(x, right_index) - target)
             k_index[i] = left_index
             left_index -= 1
         else
             k_index[i] = right_index
             right_index += 1
-    
+        end
     end
 
     sort!(k_index)
 
-    return k
+    return k_index
 end
 
 
