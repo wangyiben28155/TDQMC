@@ -76,8 +76,8 @@ end
 
 
 
-function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer)                     # 这里我们使用欧拉法即可
-    Dy.Trajectory[:, serial_num] .+= P.Δt * Accelaration(P, Dy, serial_num)
+function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer; dt = P.Δt)                     # 这里我们使用欧拉法即可
+    Dy.Trajectory[:, serial_num] .+= dt * Accelaration(P, Dy, serial_num)
 end
 
 

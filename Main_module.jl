@@ -11,7 +11,7 @@ const σ = 30
 
 
 function initializer_guideWave(x::T) where {T<:AbstractFloat}                                           #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
- 
+
     return complex(sqrt.(pdf(Normal(x, σ), LinRange(-L, L, x_num))))
 end
 
@@ -23,10 +23,10 @@ function generate_distribution(x::Int)
 end
 
 @kwdef mutable struct Dynamics{T<:AbstractFloat}
-    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)                       #=先给定一个初始的轨迹分布,目前只是计算氢原子的情况,
-                                                                                                  所以先只使用向量保存当前时刻的位置信息, 并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算,所以将其放在列坐标加快运算=#
-    Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = initializer_guideWave.(Trajectory)                #=这里得到的分布是概率密度的开平方作为初始的波函数
-                                                                                                  进行演化=#                     
+    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)                       =先给定一个初始的轨迹分布,目前只是计算氢原子的情况,
+                                                                               所以先只使用向量保存当前时刻的位置信息, 并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算,所以将其放在列坐标加快运算=#
+    Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = initializer_guideWave.(Trajectory)                =这里得到的分布是概率密度的开平方作为初始的波函数
+                                                                                      进行演化=#
     Slater_Determinant::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
     Slater_Determinant_Dericative::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
     Time::Union{T,Complex{T}} = 0.0
@@ -51,9 +51,11 @@ include("Potential.jl")
 include("Physical_quantity.jl")
 include("Crank_Nicolson.jl")
 include("Trajectory.jl")
-indlude("Groud_Evolution.jl")
+indlude("Evolution.jl")
 
 
+using .Crank_Nicolson
+using .Evolution
 
 
 end
