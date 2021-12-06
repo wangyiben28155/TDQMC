@@ -7,16 +7,12 @@ import Base.@kwdef
 
 const Ensemble_num, Electron_num = (50, 1)                                 #设定一些计算的参数
 const L, x_num, step_t = (350.0, 1751, 13001)
-const μ, σ = (0, 30)
+const σ = 30
 
 
-function initializer_guideWave()                                           #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
-    local A = complex(sqrt.(pdf(Normal(μ, σ), LinRange(-L, L, x_num))))
-    local B::Matrix{<:Vector}
-
-    B = fill(A, (Electron_num, Ensemble_num))
-
-    return B
+function initializer_guideWave(x::T) where {T<:AbstractFloat}                                           #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
+ 
+    return complex(sqrt.(pdf(Normal(x, σ), LinRange(-L, L, x_num))))
 end
 
 function generate_distribution(x::Int)
@@ -27,12 +23,12 @@ function generate_distribution(x::Int)
 end
 
 @kwdef mutable struct Dynamics{T<:AbstractFloat}
-    Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = initializer_guideWave()                          #这里得到的分布是概率密度的开平方作为初始的波函数
-    #进行演化  
-    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)                   #先给定一个初始的轨迹分布,目前只是计算氢原子的情况,所以
-    Slater_Determinant::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))           #先只使用向量保存当前时刻的位置信息, 并且之后代表不同电
-    Slater_Determinant_Dericative::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))#子之间粒子的位置之间的运算会有矢量化运算,所以将其放在列
-    #坐标加快运算
+    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)                       #=先给定一个初始的轨迹分布,目前只是计算氢原子的情况,
+                                                                                                  所以先只使用向量保存当前时刻的位置信息, 并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算,所以将其放在列坐标加快运算=#
+    Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = initializer_guideWave.(Trajectory)                #=这里得到的分布是概率密度的开平方作为初始的波函数
+                                                                                                  进行演化=#                     
+    Slater_Determinant::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
+    Slater_Determinant_Dericative::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
     Time::Union{T,Complex{T}} = 0.0
 end
 
@@ -40,12 +36,12 @@ end
 @kwdef struct Parameter{T1<:AbstractFloat,T2<:Integer}                        #用来控制计算参数的
     electron::T2 = Electron_num
     particle::T2 = Ensemble_num
-    space_N::T2 = x_num                                       #划分的格点的总数,后面做离散傅里叶变换的时候会用得到
-    scope::T1 = L                                                 #确定波函数的计算范围为-scope到+scope
-    Δx::T1 = 2 * scope / (N - 1)                                  #波函数的离散的空间间隔
+    space_N::T2 = x_num                                                       #划分的格点的总数,后面做离散傅里叶变换的时候会用得到
+    scope::T1 = L                                                             #确定波函数的计算范围为-scope到+scope
+    Δx::T1 = 2 * scope / (N - 1)                                              #波函数的离散的空间间隔
     Square_Δx::T1 = 2 * (P.Δx)^2
-    sampling::Vector{T1} = collect(LinRange(-scope, scope, space_N))
-    Δt::Union{T1,Complex{T1}} = 0.05                               #划分的时间间隔, 尝试时间迭代区间, 因为考虑到虚时演化, 所以类型设定为复数
+    sampling::LinRange{T1} = LinRange(-scope, scope, space_N)
+    Δt::Union{T1,Complex{T1}} = 0.05                                          #划分的时间间隔, 尝试时间迭代区间, 因为考虑到虚时演化, 所以类型设定为复数
     step_t::T2 = step_t
 end
 

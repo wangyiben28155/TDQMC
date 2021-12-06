@@ -3,7 +3,7 @@ module Find_nearest_k
 export find_k_index
 
 
-function find_eg_index(target::T; x::Vector{T}) where {T<:Number}                #这里x为从小到大排序好的数组
+function find_eg_index(target::T; x::AbstractVector{T}) where {T<:Number}                #这里x为从小到大排序好的数组
     local Start::Integer = 1
     local End::Integer = length(x)
     local Middle::Integer = (Start + End) >> 1
@@ -26,7 +26,7 @@ function find_eg_index(target::T; x::Vector{T}) where {T<:Number}               
 end
 
 
-function find_closest_index(target::T; x::Vector{T}) where {T<:Number}
+function find_closest_index(target::T; x::AbstractVector{T}) where {T<:Number}
     local eg_index::Integer = find_eg_index(target, x = x)     #这里直接计算得到大于target值得坐标
 
     if eg_index == length(x) + 1
@@ -43,7 +43,7 @@ function find_closest_index(target::T; x::Vector{T}) where {T<:Number}
 
 end
 
-function get_ele(x::Vector{T}, index::Integer) where {T<:Number}
+function get_ele(x::AbstractVector{T}, index::Integer) where {T<:Number}
     if index < 1 || index > length(x)
         return Inf
     else
@@ -52,7 +52,7 @@ function get_ele(x::Vector{T}, index::Integer) where {T<:Number}
 end
 
 
-function find_k_index(target::T1; x::Vector{T1}, k::T2) where {T1<:Number,T2<:Integer}       #找到最接近得k个元素,并返回一个索引的数组
+function find_k_index(target::T1; x::AbstractVector{T1}, k::T2) where {T1<:Number,T2<:Integer}       #找到最接近得k个元素,并返回一个索引的数组
     local k_index::Vector{T2} = zeros(T2, k)
     local closest_index::T2 = find_closest_index(target, x = x)
     local left_index = closest_index - 1
