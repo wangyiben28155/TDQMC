@@ -1,6 +1,6 @@
 module TDQMC
 
-export Dynamics, Parameter, generate_distribution, Initializer_GuideWave
+export Dynamics, Parameter, Movement!, CN_Evolution!
 
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
 import Base.@kwdef
@@ -23,11 +23,11 @@ function generate_distribution(x::Int)
 end
 
 @kwdef mutable struct Dynamics{T<:AbstractFloat}
-    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)                       =先给定一个初始的轨迹分布,目前只是计算氢原子的情况,
-                                                                               所以先只使用向量保存当前时刻的位置信息, 并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算,所以将其放在列坐标加快运算=#
-    Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = initializer_guideWave.(Trajectory)                =这里得到的分布是概率密度的开平方作为初始的波函数
-                                                                                      进行演化=#
-    Slater_Determinant::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
+    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)   #= 先给定一个初始的轨迹分布, 目前只是计算氢原子的情况,
+    所以先只使用向量保存当前时刻的位置信息, 并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算, 所以将其放在列坐标加快运算 =#
+        Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = initializer_guideWave.(Trajectory)     #= 这里得到的分布是概率密度的开平方作为初始的波函数
+    进行演化 =#
+        Slater_Determinant::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
     Slater_Determinant_Dericative::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
     Time::Union{T,Complex{T}} = 0.0
 end
@@ -51,11 +51,11 @@ include("Potential.jl")
 include("Physical_quantity.jl")
 include("Crank_Nicolson.jl")
 include("Trajectory.jl")
-indlude("Evolution.jl")
+include("Evolution.jl")
 
 
-using .Crank_Nicolson
+
 using .Evolution
-
+using .Trajectory
 
 end

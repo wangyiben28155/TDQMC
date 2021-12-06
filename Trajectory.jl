@@ -1,6 +1,6 @@
 module Trajectory
 
-export Movement
+export Movement!
 
 using ..TDQMC
 using ..TDQMC.Find_nearest_k
@@ -40,7 +40,7 @@ end
 
 
 function Slater_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)           #通过此函数得到交叉关联的波函数, 按理来说有多少个电子就应该有多少个坐标,对应Electron_num维度的电子波函数
-    local Type_2 = keytype(Dy.Guide_Wave)
+    local Type_2 = eltype(eltype(yd))
     local Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex} = (zeros(Type_2, P.electron), zeros(Type_1, P.electron))
     local symmetric_determinate::Matrix{<:Complex} = zeros(Type_2, (P.electron, P.electron))
     local Derivate_eachcoodinate::Matrix{<:Complex} = zeros(Type_2, (P.electron, P.electron))
@@ -77,7 +77,7 @@ end
 
 
 function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer; dt = P.Δt)                     # 这里我们使用欧拉法即可
-    Dy.Trajectory[:, serial_num] .+= dt * Accelaration(P, Dy, serial_num)
+    Dy.Trajectory[:, serial_num] .+= abs(dt) * Accelaration(P, Dy, serial_num)
 end
 
 

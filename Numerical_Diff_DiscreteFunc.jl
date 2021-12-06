@@ -2,7 +2,6 @@ module Discrete_Func_diff
 
 export Three_Point, Five_Point, Derivative_2
 
-#using ..TDQMC
 using SparseArrays
 
 
