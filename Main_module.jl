@@ -51,6 +51,7 @@ include("Potential.jl")
 include("Physical_quantity.jl")
 include("Crank_Nicolson.jl")
 include("Trajectory.jl")
+indlude("Groud_Evolution.jl")
 
 
 

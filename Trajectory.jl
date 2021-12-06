@@ -4,7 +4,7 @@ export Movement
 
 using ..TDQMC
 using ..TDQMC.Find_nearest_k
-using Interpolations   #然后对不在格点上的轨迹进行插值求得其导数等等
+using Interpolations, LinearAlgebra   #然后对不在格点上的轨迹进行插值求得其导数等等
 
 
 function find_lattice_wave(Particle_num::Integer, serial_num::Integer, P::Parameter, Dy::Dynamics; k::Integer = 5) where {T<:AbstractFloat}     #这个对应的是粒子的轨迹矢量,用来得到相应的波函数插值的部分
@@ -24,8 +24,9 @@ end
 function Interpolation_Wave(Particle_num::Integer, serial_num::Integer, P::Parameter, Dy::Dynamics)
     local localtion = Dy.Trajectory[Particle_num, serial_num]
     local xd, yd = find_lattice_wave(Particle_num, serial_num, P, Dy)
-    local Vec_Wave::Vector{<:Complex} = zeros(eltype(eltype(yd)), P.electron)
-    local Vec_Derivate::Vector{<:Complex} = zeros(eltype(Vec_Wave), P.electron)
+    local Type_1 = eltype(eltype(yd))
+    local Vec_Wave::Vector{<:Complex} = zeros(Type_1, P.electron)
+    local Vec_Derivate::Vector{<:Complex} = zeros(Type_1, P.electron)
     local interp_cubic::Function
 
     for i = 1:P.electron
@@ -39,31 +40,46 @@ end
 
 
 function Slater_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)           #通过此函数得到交叉关联的波函数, 按理来说有多少个电子就应该有多少个坐标,对应Electron_num维度的电子波函数
-    local Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex}
-    local Type_1 = eltype(eltype(Dy.Guide_Wave))
-    local symmetric_WaveFunc::Matrix{<:Complex} = zeros(Type_1, (P.electron, P.electron))
-    local Derivate_eachcoodinate::Matrix{<:Complex} = zeros(Type_1, (P.electron, P.electron))
+    local Type_2 = keytype(Dy.Guide_Wave)
+    local Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex} = (zeros(Type_2, P.electron), zeros(Type_1, P.electron))
+    local symmetric_determinate::Matrix{<:Complex} = zeros(Type_2, (P.electron, P.electron))
+    local Derivate_eachcoodinate::Matrix{<:Complex} = zeros(Type_2, (P.electron, P.electron))
 
     for i = 1:P.electron
         Vec_Wave, Vec_Derivate = Interpolation_Wave(i, serial_num, P, Dy)
-        symmetric_WaveFunc[:, i] = Vec_Wave
+        symmetric_determinate[:, i] = Vec_Wave
         Derivate_eachcoodinate[:, i] = Vec_Derivate
     end
 
 
-    return symmetric_WaveFunc, Derivate_eachcoodinate
-end
-
-function Derivative_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)
-    local Vector_accelerate::Vector{<:AbstractFloat} = zeros(typeof())
-
+    return symmetric_determinate, Derivate_eachcoodinate
 end
 
 
 
 
-function Movement(P::Parameter, Dy::Dynamics)                     # 这里我们使用欧拉法即可
-    local 
+function Accelaration(P::Parameter, Dy::Dynamics, serial_num::Integer)
+    local symmetric_determinate, Derivate_eachcoodinate = Slater_determinant(P, Dy, serial_num)
+    local Derivate_WaveFunc::Vector{<:Matrix{<:Complex}} = fill(symmetric_WaveFunc, P.electron)
+    local symmetric_WaveFunc::Vector{<:Matrix{<:Complex}} = deepcopy(Derivate_WaveFunc)
+    local Vector_accelerate::Vector{<:AbstractFloat} = zeros(eltype(symmetric_determinate), P.electron)
+
+    for i = 1:P.electron
+        @inbounds Derivate_WaveFunc[i][:, i] = Derivate_eachcoodinate[:, i]
+    end
+
+    Vector_accelerate[:] = @. imag(det(Derivate_WaveFunc) / det(symmetric_WaveFunc))
+
+    return Vector_accelerate
+end
+
+
+
+
+function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer)                     # 这里我们使用欧拉法即可
+    Dy.Trajectory[:, serial_num] .+= P.Δt * Accelaration(P, Dy, serial_num)
+end
+
 
 
 end
