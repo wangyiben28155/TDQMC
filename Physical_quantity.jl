@@ -4,9 +4,10 @@ export Energy
 
 using ..TDQMC
 using ..TDQMC.Discrete_Func_diff
+using ..TDQMC.Find_nearest_k
+using ..TDQMC.Potential
 
-function Energy(P::Parameter, Dy::Dynamics)
-    local coefficient = 1/P.particle
+function Group_Energy(P::Parameter, Dy::Dynamics)
     local A
 
 
@@ -15,9 +16,14 @@ function Energy(P::Parameter, Dy::Dynamics)
 end
 
 
+function TD_dipole!()
 
 
+end
 
+function ()
+    
+end
 
 
 

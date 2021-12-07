@@ -11,7 +11,8 @@ function find_lattice_wave(Particle_num::Integer, serial_num::Integer, P::Parame
     local localtion = Dy.Trajectory[Particle_num, serial_num]
     local indexVec_k::Vector{<:Integer} = find_k_index(localtion, x = P.sampling, k = k)
     local Type_0 = eltype(eltype(Dy.Guide_Wave))
-    local k_itp_Wave_Vector::Vector{<:Vector{<:Complex{T}}} = fill(zeros(Type_0, k), P.electron)     #选取五个点用来插值的波函数矢量
+    local k_itp_Wave_Vector::Vector{<:Vector{<:Complex{T}}} = [zeros(Type_0, k) for i in 1:P.electron]     #=选取五个点用来插值的波函数矢量,注意这种
+                                                                                                           赋值的方式每一个重复的部分在后面赋值的时候不会产生关联.=#
 
     for i = 1:P.electron
         @inbounds k_itp_Wave_Vector[i] = Dy.Guide_Wave[i, serial_num][indexVec_k]
@@ -60,8 +61,8 @@ end
 
 function Accelaration(P::Parameter, Dy::Dynamics, serial_num::Integer)
     local symmetric_determinate, Derivate_eachcoodinate = Slater_determinant(P, Dy, serial_num)
-    local Derivate_WaveFunc::Vector{<:Matrix{<:Complex}} = fill(symmetric_WaveFunc, P.electron)
-    local symmetric_WaveFunc::Vector{<:Matrix{<:Complex}} = deepcopy(Derivate_WaveFunc)
+    local Derivate_WaveFunc::Vector{<:Matrix{<:Complex}} = [symmetric_WaveFunc for i = 1:P.electron]
+    local symmetric_WaveFunc::Vector{<:Matrix{<:Complex}} = fill(symmetric_WaveFunc, P.electron)
     local Vector_accelerate::Vector{<:AbstractFloat} = zeros(eltype(symmetric_determinate), P.electron)
 
     for i = 1:P.electron

@@ -23,19 +23,20 @@ function generate_distribution(x::Int)
 end
 
 @kwdef mutable struct Dynamics{T<:AbstractFloat}
-    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)   #= 先给定一个初始的轨迹分布, 目前只是计算氢原子的情况,
-    所以先只使用向量保存当前时刻的位置信息, 并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算, 所以将其放在列坐标加快运算 =#
-        Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = initializer_guideWave.(Trajectory)     #= 这里得到的分布是概率密度的开平方作为初始的波函数
+    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)   = 先给定一个初始的轨迹分布, 目前只是计算氢原子的情况,
+     所以先只使用向量保存当前时刻的位置信息, 并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算, 所以将其放在列坐标加快运算 =#
+    Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = initializer_guideWave.(Trajectory)     = 这里得到的分布是概率密度的开平方作为初始的波函数
     进行演化 =#
-        Slater_Determinant::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
+    Slater_Determinant::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
     Slater_Determinant_Dericative::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
+    Energy::Vector{T} = zeros(T, Ensemble_num)
     Time::Union{T,Complex{T}} = 0.0
 end
 
 
 @kwdef struct Parameter{T1<:AbstractFloat,T2<:Integer}                        #用来控制计算参数的
     electron::T2 = Electron_num
-    particle::T2 = Ensemble_num
+    Group::T2 = Ensemble_num
     space_N::T2 = x_num                                                       #划分的格点的总数,后面做离散傅里叶变换的时候会用得到
     scope::T1 = L                                                             #确定波函数的计算范围为-scope到+scope
     Δx::T1 = 2 * scope / (N - 1)                                              #波函数的离散的空间间隔
@@ -51,8 +52,9 @@ include("Potential.jl")
 include("Physical_quantity.jl")
 include("Crank_Nicolson.jl")
 include("Trajectory.jl")
+include("visualization.jl")
 include("Evolution.jl")
-
+include("Calculation.jl")
 
 
 using .Evolution
