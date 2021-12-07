@@ -7,7 +7,7 @@ import Base.@kwdef
 
 const Ensemble_num, Electron_num = (50, 1)                                 #设定一些计算的参数
 const L, x_num, step_t = (350.0, 1751, 13001)
-const σ = 30
+const μ, σ = (0, 30)
 
 
 function initializer_guideWave(x::T) where {T<:AbstractFloat}                                           #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
