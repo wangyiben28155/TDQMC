@@ -5,6 +5,7 @@ export CN_Evolution!
 using ..TDQMC
 using ..TDQMC.Crank_Nicolson
 using ..TDQMC.Trajectory
+using ..TDQMC.Quantity
 
 using SparseArrays
 
@@ -14,7 +15,7 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int)         #计
     local later_fix::SparseMatrixCSC = spdiagm(-1 => Constructure, 1 => Constructure, 0 => (λ - 2.0) .- Square_Δx .* V_ne.(P.sampling))
     local former_fix::SparseMatrixCSC = spdiagm(-1 => -Constructure, 1 => -Constructure, 0 => (λ + 2.0) .+ Square_Δx .* V_ne.(P.sampling))
 
-    local Change_matrix_former::Vector{<:SparseMatrixCSC} = [spzeros(eltype(later_fix), P.space_N, P.space_N) for i in 1:P.electron]     #这两个向量稀 
+    local Change_matrix_former::Vector{<:SparseMatrixCSC} = [spzeros(eltype(later_fix), P.space_N, P.space_N) for i = 1:P.electron]     #这两个向量稀 
     #疏矩阵用来计算的两个矩阵
     local Change_matrix_later::Vector{<:SparseMatrixCSC} = -deepcopy(Change_matrix_former)           #所有的元素取负值
 
@@ -28,10 +29,10 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int)         #计
         end
         Reset_matrix!(P, Dy, serial_num, Change_matrix_former, Change_matrix_later)
         Construct_matrix!(P, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
-    
+
         Dy.Guide_Wave[:] = Change_matrix_former .* Dy.Guide_Wave
         Dy.Guide_Wave[:] = Change_matrix_later .\ Dy.Guide_Wave
-    
+
         Dy.Time += P.Δt
     end
 
