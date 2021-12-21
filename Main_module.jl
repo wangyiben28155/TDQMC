@@ -8,7 +8,7 @@ import Base.@kwdef
 const Ensemble_num, Electron_num = (6, 1)                                 #设定一些计算的参数
 const L, x_num, step_t = (350.0, 1751, 13001)
 const μ, σ = (0, 30)
-
+const spin = Int.(rand(Bool, Electron_num))
 
 function initializer_guideWave(x::T) where {T<:AbstractFloat}                                           #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
 
@@ -37,6 +37,7 @@ end
 @kwdef struct Parameter{T1<:AbstractFloat,T2<:Integer}                        #用来控制计算参数的
     electron::T2 = Electron_num
     Group::T2 = Ensemble_num
+    Spin::Vector{T2} = spin
     space_N::T2 = x_num                                                       #划分的格点的总数,后面做离散傅里叶变换的时候会用得到
     scope::T1 = L                                                             #确定波函数的计算范围为-scope到+scope
     Δx::T1 = 2 * scope / (N - 1)                                              #波函数的离散的空间间隔

@@ -39,7 +39,6 @@ function Interpolation_Wave(Particle_num::Integer, serial_num::Integer, P::Param
 end
 
 
-
 function Slater_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)           #通过此函数得到交叉关联的波函数, 按理来说有多少个电子就应该有多少个坐标,对应Electron_num维度的电子波函数
     local Type_2 = eltype(eltype(yd))
     local Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex} = (zeros(Type_2, P.electron), zeros(Type_1, P.electron))
@@ -52,11 +51,8 @@ function Slater_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)    
         Derivate_eachcoodinate[:, i] = Vec_Derivate
     end
 
-
     return symmetric_determinate, Derivate_eachcoodinate
 end
-
-
 
 
 function Accelaration(P::Parameter, Dy::Dynamics, serial_num::Integer)
@@ -73,8 +69,6 @@ function Accelaration(P::Parameter, Dy::Dynamics, serial_num::Integer)
 
     return Vector_accelerate
 end
-
-
 
 
 function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer; dt = P.Δt)                     # 这里我们使用欧拉法即可
