@@ -55,24 +55,24 @@ function Slater_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)    
 end
 
 
-function Accelaration(P::Parameter, Dy::Dynamics, serial_num::Integer)
+function Velocity(P::Parameter, Dy::Dynamics, serial_num::Integer)
     local symmetric_determinate, Derivate_eachcoodinate = Slater_determinant(P, Dy, serial_num)
     local Derivate_WaveFunc::Vector{<:Matrix{<:Complex}} = [symmetric_WaveFunc for i = 1:P.electron]
     local symmetric_WaveFunc::Vector{<:Matrix{<:Complex}} = fill(symmetric_WaveFunc, P.electron)
-    local Vector_accelerate::Vector{<:AbstractFloat} = zeros(eltype(symmetric_determinate), P.electron)
+    local Vector_velocity::Vector{<:AbstractFloat} = zeros(eltype(symmetric_determinate), P.electron)
 
     for i = 1:P.electron
         @inbounds Derivate_WaveFunc[i][:, i] = Derivate_eachcoodinate[:, i]
     end
 
-    Vector_accelerate[:] = @. imag(det(Derivate_WaveFunc) / det(symmetric_WaveFunc))
+    Vector_velocity[:] = @. imag(det(Derivate_WaveFunc) / det(symmetric_WaveFunc))
 
-    return Vector_accelerate
+    return Vector_velocity
 end
 
 
 function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer; dt = P.Δt)                     # 这里我们使用欧拉法即可
-    Dy.Trajectory[:, serial_num] .+= abs(dt) * Accelaration(P, Dy, serial_num)
+    Dy.Trajectory[:, serial_num] .+= abs(dt) * Velocity(P, Dy, serial_num)
 end
 
 

@@ -16,10 +16,9 @@ function parallel_Evolution!(P::Parameter, Dy::Dynamics)
     @threads for i = 1:P.Group
         CN_Evolution!(P, Dy, i)
         @inbounds Thread_workload[threadid()] += 1
-
+        println(Thread_workload)
     end
 
-    println(Thread_workload)
     println("Caiculation is over!")
 
 end

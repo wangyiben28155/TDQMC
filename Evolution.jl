@@ -22,11 +22,8 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int)         #计
 
 
     for i = 1:P.step_t
-        if i == 1
-            Movement!(P, Dy, serial_num, dt = P.Δt / 2)
-        else
-            Movement!(P, Dy, serial_num)
-        end
+        Movement!(P, Dy, serial_num, dt = P.Δt / ifelse(i==1, 2.0, 1.0))
+
         Reset_matrix!(P, Dy, serial_num, Change_matrix_former, Change_matrix_later)
         Construct_matrix!(P, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
 

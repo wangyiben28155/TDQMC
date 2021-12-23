@@ -69,7 +69,7 @@ function TD_dipole!()
 
 end
 
-function ()
+function acceleration()
 
 end
 

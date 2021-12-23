@@ -17,18 +17,16 @@ end
 
 function generate_distribution(x::Int)
     Random.seed!(x)                                                       #确定下一次使用rand函数的撒点是固定的, 每次调用程序也能保证下面的分布是确定的
-    Initial_Distriution = rand(Normal(μ, σ), Ensemble_num)                #将确定的撒点分布储存起来, 用于下面实例化的赋值
+    Initial_Distriution = rand(Normal(μ, σ), Electron_num)                #将确定的撒点分布储存起来, 用于下面实例化的赋值
 
     return Initial_Distriution'
 end
 
 @kwdef mutable struct Dynamics{T<:AbstractFloat}
-    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...) = 先给定一个初始的轨迹分布, 目前只是计算氢原子的情况,
-    所以先只使用向量保存当前时刻的位置信息, 并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算, 所以将其放在列坐标加快运算 =#
-        Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = initializer_guideWave.(Trajectory) = 这里得到的分布是概率密度的开平方作为初始的波函数
-    进行演化 =#
-        Slater_Determinant::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
-    Slater_Determinant_Dericative::Matrix{T} = zeros(Complex{T}, (Electron_num, Electron_num))
+    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Ensemble_num)...)             #=先给定一个初始的轨迹分布, 目前只是计算氢原子的情况,
+                                                            并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算, 所以将其放在列坐标加快运算 =#
+    Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = initializer_guideWave.(Trajectory)     #=这里得到的分布是概率密度的开平方作为初始的波函数
+                                                                                                                            进行演化 =#
     Energy::Vector{T} = zeros(T, Ensemble_num)
     Time::Union{T,Complex{T}} = 0.0
 end
