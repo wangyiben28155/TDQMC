@@ -17,7 +17,7 @@ function kinetic_part(P::Parameter, Dy::Dynamics, serial_num::Integer)
     local Type = eltype(eltype(Dy.Guide_Wave))
     local location_vec::Vector = Dy.Trajectory[:, serial_num]
     local indexVec_k::Vector{<:Vector{<:Integer}} = find_k_index.(location_vec, x = P.sampling, k = 5)
-    local k_itp_Wave_Vec::Vector{<:Vector{<:Complex}} = [zeros(Type, k) for i = 1:P.electron]
+    local k_itp_Wave_Vec::Vector{<:Vector{<:Complex}} = [zeros(Type, k) for i = 1:P.electron]    #选取的五个轨迹点最近邻点的波函数的值
     local derivative_Wave_Vec::Vector{<:Vector{<:Complex}} = deepcopy(k_itp_Wave_Vec)
     local Vector_Interp::Vector{<:Complex} = zeros(Type, P.electron)
     local Vector_Interp_derv::Vector{<:Complex} = zeros(Type, P.electron)

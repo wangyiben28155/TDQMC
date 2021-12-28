@@ -5,28 +5,28 @@ export Dynamics, Parameter, Movement!, CN_Evolution!, parallel_Evolution!
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
 import Base.@kwdef
 
-const Ensemble_num, Electron_num = (6, 1)                                 #设定一些计算的参数
+const Ensemble_num, Electron_num = (50, 1)                                 #设定一些计算的参数
 const L, x_num, step_t = (350.0, 1751, 13001)
-const μ, σ = (0, 30)
-const spin = Int.(rand(Bool, Electron_num))
+const μ, σ = (LinRange(-(Electron_num - 1) / 2, (Electron_num - 1) / 2, Electron_num), 30)       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
+const spin = [1,-1]
 
-function initializer_guideWave(x::T) where {T<:AbstractFloat}                                           #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
+function initializer_guideWave(n::T) where {T<:Integer}                                           #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
 
-    return complex(sqrt.(pdf(Normal(x, σ), LinRange(-L, L, x_num))))
+    return complex(sqrt.(pdf(Normal(μ[n], σ), LinRange(-L, L, x_num))))
 end
 
-function generate_distribution(x::Int)
-    Random.seed!(x)                                                       #确定下一次使用rand函数的撒点是固定的, 每次调用程序也能保证下面的分布是确定的
-    Initial_Distriution = rand(Normal(μ, σ), Electron_num)                #将确定的撒点分布储存起来, 用于下面实例化的赋值
+function generate_distribution(n::Int)
+    Random.seed!(n)                                                       #确定下一次使用rand函数的撒点是固定的, 每次调用程序也能保证下面的分布是确定的
+    Initial_Distriution = rand(Normal(μ[n], σ), Ensemble_num)                #将确定的撒点分布储存起来, 用于下面实例化的赋值
 
     return Initial_Distriution'
 end
 
 @kwdef mutable struct Dynamics{T<:AbstractFloat}
-    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Ensemble_num)...)             #=先给定一个初始的轨迹分布, 目前只是计算氢原子的情况,
-                                                            并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算, 所以将其放在列坐标加快运算 =#
-    Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = initializer_guideWave.(Trajectory)     #=这里得到的分布是概率密度的开平方作为初始的波函数
-                                                                                                                            进行演化 =#
+    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)             #先给定一个初始的轨迹分布, 目前只是计算氢原子的情况,
+    #并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算, 所以将其放在列坐标加快运算 
+    Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = [initializer_guideWave(i) for i in 1:Electron_num, j in 1:Ensemble_num]     #这里得到的分布是概率密度的开平方作为初始的波函数
+    #进行演化
     Energy::Vector{T} = zeros(T, Ensemble_num)
     Time::Union{T,Complex{T}} = 0.0
 end
@@ -53,6 +53,7 @@ include("Crank_Nicolson.jl")
 include("Trajectory.jl")
 include("visualization.jl")
 include("Evolution.jl")
+include("Evolution_complex.jl")
 include("Calculation.jl")
 
 
