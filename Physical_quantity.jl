@@ -74,11 +74,4 @@ function acceleration()
 end
 
 
-
-
-
-
-
-
-
 end

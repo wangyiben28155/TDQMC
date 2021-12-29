@@ -1,6 +1,6 @@
 module Potential_Matrix                                                  #这里的函数使用的
 
-export Vne, V_ee, Vtd_Operator
+export V_ne, V_ee, Vtd_Operator
 
 using ..TDQMC
 using SparseArrays, LinearAlgebra
@@ -25,9 +25,7 @@ function Vee_Operator(x_t::Vector{T}, P::Parameter) where {T<:AbstractFloat}    
 end
 
 function Vtd_Operator(x_t::Vector{T}, P::Parameter, t::T; Field::Function = t::T -> 0.0) where {T<:AbstractFloat} #随时间变化的势能项, 这里之所以拆开是为了方便后面的矩阵构造时候能更节省时间
-    local Matrix_td::Matrix{T} = zeros(T, (P.space_N, P.electron))                  #多电子势能项
-
-    Matrix_td = Vee_Operator(x_t, P)
+    local Matrix_td::Matrix{T} = Vee_Operator(x_t, P)                       #多电子势能项,矩阵大小为(P.space_N, P.electron)
 
     Matrix_td .+= repeat(Field(t) .* P.sampling, outer = (1, P.electron))     #偶极近似下与电场相互作用的势能项,这里因为选择的电场为零,这样省去的计算的时间,之后电场不为零的情况下可以把判断的条件给去掉
 
