@@ -5,6 +5,7 @@ export plot_probability, plot_Ground
 using ..TDQMC
 using PyPlot
 
+
 function plot_probability(P::Parameter)
     local df = CSV.read("Time_evolution_wave_function.csv", DataFrame)
 
@@ -17,7 +18,7 @@ function plot_probability(P::Parameter)
     xlabel("X(a.u)")
 
 end
-
+ 
 
 
 function plot_Ground()
@@ -60,4 +61,6 @@ end
 
 
 
+function plot_Trajectory(P::Parameter)              #只是为了展示一下粒子的轨迹运动随时间的变化
+    local df = CSV.read("Tra")
 end

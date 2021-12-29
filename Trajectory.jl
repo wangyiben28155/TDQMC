@@ -28,12 +28,12 @@ function Interpolation_Wave(Particle_num::Integer, serial_num::Integer, P::Param
     local Type_1 = eltype(eltype(yd))
     local Vec_Wave::Vector{<:Complex} = zeros(Type_1, P.electron)
     local Vec_Derivate::Vector{<:Complex} = zeros(Type_1, P.electron)
-    local interp_cubic::Function
+    local interp_cubic::Interpolations.Extrapolation
 
     for i = 1:P.electron
         interp_cubic = CubicSplineInterpolation(xd, yd[i])        #得到三次样条插值函数, i 代表每个电子的波函数的五点取样值
-        Vec_Wave[i] = interp_cubic(localtion)                     #然后
-        Vec_Derivate[i] = Interpolations.gradient(interp_cubic, localtion)
+        @inbounds Vec_Wave[i] = interp_cubic(localtion)                     #然后
+        @inbounds Vec_Derivate[i] = Interpolations.gradient(interp_cubic, localtion)[1]
     end
     return Vec_Wave, Vec_Derivate    #返回在particle_num的电子的轨迹处, 对所有电子的波函数和导数的取值
 end
@@ -47,8 +47,8 @@ function Slater_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)    
 
     for i = 1:P.electron
         Vec_Wave, Vec_Derivate = Interpolation_Wave(i, serial_num, P, Dy)
-        symmetric_determinate[:, i] = Vec_Wave
-        Derivate_eachcoodinate[:, i] = Vec_Derivate
+        @inbounds symmetric_determinate[:, i] = Vec_Wave
+        @inbounds Derivate_eachcoodinate[:, i] = Vec_Derivate
     end
 
     return symmetric_determinate, Derivate_eachcoodinate
