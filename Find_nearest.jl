@@ -72,7 +72,7 @@ function find_k_index(target::T1; x::AbstractVector{T1}, k::T2) where {T1<:Numbe
 
     sort!(k_index)
 
-    return k_index
+    return k_index[1]:k_index[end]
 end
 
 

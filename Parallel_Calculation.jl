@@ -8,8 +8,14 @@ using ..TDQMC.Evolution
 using ..TDQMC.Ground_state
 using ..TDQMC.Quantity
 
-using Base.Threads, SparseArrays
+using Base.Threads, SparseArrays, CSV, DataFrames
 
+
+function record_Ground(Dy::Dynamics)                                      #这个函数虽然和function_1里的函数同名但是作用域是隔离的
+    local df = DataFrame(Dy.Trajectory, :auto)
+
+    CSV.write("Ground_state.csv", df)
+end
 
 function parallel_Evolution!(P::Parameter, Dy::Dynamics)
     local Threads_num::Integer = nthreads()
@@ -24,9 +30,9 @@ function parallel_Evolution!(P::Parameter, Dy::Dynamics)
     #这里对固定的构造参数使用传参, 而不在函数原来本身内部定义, 避免储存空间的浪费, 这些改动是在所有函数写好之后进行的更改
     @threads for i = 1:P.Group
         CN_Evolution!(P, Dy, i, later_fix = later_fix, former_fix = former_fix)
-        @inbounds Thread_workload[threadid()] += 1
+        Thread_workload[threadid()] += 1
         println(Thread_workload)
-        @inbounds Dy.Energy[i] = Group_Energy(P, Dy, i)
+        Dy.Energy[i] = Group_Energy(P, Dy, i)
     end
 
     println("Caiculation is over!")
@@ -35,7 +41,7 @@ end
 
 function parallel_CTR!(P::Parameter, Dy::Dynamics)
     local Threads_num::Integer = nthreads()
-    local Thread_workload::Vector{<:Integer} = zeros(typeof(Threads_num), Threads_num)  
+    local Thread_workload::Vector{<:Integer} = zeros(typeof(Threads_num), Threads_num)
 
 
     local λ = P.Square_Δx * 1im / P.Δt
@@ -44,13 +50,13 @@ function parallel_CTR!(P::Parameter, Dy::Dynamics)
     local former_fix::SparseMatrixCSC = spdiagm(-1 => -Constructure, 1 => -Constructure, 0 => (λ + 2.0) .+ P.Square_Δx .* V_ne.(P.sampling))
 
 
-    @threads for i = 1:P.Group
+    for i = 1:P.Group
         CTR!(P, Dy, i, later_fix = later_fix, former_fix = former_fix)
-        @inbounds Dy.Energy[i] = Group_Energy(P, Dy, i)
-        @inbounds Thread_workload[threadid()] += 1
+        Dy.Energy[i] = Group_Energy(P, Dy, i)
+        Thread_workload[threadid()] += 1
         println(Thread_workload)
     end
-
+    record_Ground(Dy)
     println("Caiculation is over!")
 
 end

@@ -14,9 +14,7 @@ using SparseArrays
 function record(P::Parameter, Dy::Dynamics)                                      #这个函数虽然和function_1里的函数同名但是作用域是隔离的
     local df = DataFrame()
 
-    df.x = P.sampling
-    df.wave = Dy.
-    CSV.write("Ground_state.csv", df)
+
 end
 
 

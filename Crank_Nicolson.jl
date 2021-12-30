@@ -12,7 +12,7 @@ function ChangePart_Matrix!(pre_alloc::Vector{<:SparseMatrixCSC}, P::Parameter, 
     local Matrix_Vtd::Matrix{<:AbstractFloat} = Vtd_Operator(Group_particle, P, Dy.Time)  #= 提取第serial_num组系综粒子的位置坐标
                                                                                           计算随时间变化的势能项, 便于后面的线程并行化 =#
         for i = 1:P.electron
-            @inbounds pre_alloc[i] = spdiagm.(complex(Matrix_Vtd[:, i]))            #把含时势能矩阵的每一列变成稀疏矩阵的对角元
+            pre_alloc[i] = spdiagm(complex(Matrix_Vtd[:, i]))            #把含时势能矩阵的每一列变成稀疏矩阵的对角元
         end
 
 end
@@ -22,8 +22,8 @@ function Construct_matrix!(P::Parameter, later_fix::T, former_fix::T,
     Change_matrix_former::Vector{T}, Change_matrix_later::Vector{T}) where {T<:SparseMatrixCSC}
 
     for i = 1:P.electron
-        @inbounds Change_matrix_later[i] .+= later_fix
-        @inbounds Change_matrix_former[i] .+= former_fix
+        Change_matrix_later[i] .+= later_fix
+        Change_matrix_former[i] .+= former_fix
     end
 
 end

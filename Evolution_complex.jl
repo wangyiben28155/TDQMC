@@ -8,13 +8,9 @@ using ..TDQMC.Crank_Nicolson
 using ..TDQMC.Trajectory
 using ..TDQMC.Quantity
 
-using SparseArrays, CSV, DataFrames, NumericalIntegration
+using SparseArrays, NumericalIntegration
 
-function record(Dy::Dynamics)                                      #这个函数虽然和function_1里的函数同名但是作用域是隔离的
-    local df = DataFrame(Dy.Trajectory, :auto)
 
-    CSV.write("Ground_state.csv", df)
-end
 
 @inline function Normalization(P::Parameter, Dy::Dynamics, serial_num::Integer)
     return sqrt.(integrate(P.sampling, abs2.(hcat(Dy.Guide_Wave[:, serial_num])...), SimpsonEven()))
@@ -51,7 +47,7 @@ function CTR!(P::Parameter, Dy::Dynamics, serial_num::Integer;
                 Vec_wave[:] = Change_matrix_former .* Vec_wave
                 Vec_wave[:] = Change_matrix_later .\ Vec_wave
 
-                Normalizer = Normalization(P, Dy, serial_num)                                  #因为要重复使用,这里应该需要储存到一个变量里比较好.
+                Normalizer .= Normalization(P, Dy, serial_num)                                  #因为要重复使用,这里应该需要储存到一个变量里比较好.
                 Vec_wave ./= Normalizer                                        #把实空间的波函数归一化
                 #这里为了节省计算资源,对动量波函数通过矢量除法进行归一化
                 count += 1
