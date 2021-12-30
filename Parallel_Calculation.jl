@@ -8,7 +8,7 @@ using ..TDQMC.Evolution
 using ..TDQMC.Ground_state
 using ..TDQMC.Quantity
 
-using Base.Threads
+using Base.Threads, SparseArrays
 
 
 function parallel_Evolution!(P::Parameter, Dy::Dynamics)
@@ -35,7 +35,7 @@ end
 
 function parallel_CTR!(P::Parameter, Dy::Dynamics)
     local Threads_num::Integer = nthreads()
-    local Thread_workload::Vector{<:Integer} = zeros(typeof(Threads_num), Threads_num)         #注意这里有数据竞争, 等下需要修改使用锁或者原子操作
+    local Thread_workload::Vector{<:Integer} = zeros(typeof(Threads_num), Threads_num)  
 
 
     local λ = P.Square_Δx * 1im / P.Δt

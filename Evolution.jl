@@ -30,18 +30,19 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int;
     local Vec_wave = view(Dy.Guide_Wave, :, serial_num)
 
     if imag(P.Δt) == 0.0
-
+    
         for i = 1:P.step_t
             Movement!(P, Dy, serial_num, dt = P.Δt / ifelse(i == 1, 2.0, 1.0))
-
+    
             Reset_matrix!(P, Dy, serial_num, Change_matrix_former, Change_matrix_later)
             Construct_matrix!(P, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
-
+    
             Vec_wave[:] = Change_matrix_former .* Vec_wave
             Vec_wave[:] = Change_matrix_later .\ Vec_wave
-
-            Dy.Time += P.Δt
+    
         end
+    
+        Dy.Time = P.step_t * P.Δt
     else
         return @error "the Time shold be a real number"
     end

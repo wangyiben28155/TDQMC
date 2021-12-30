@@ -3,17 +3,16 @@ module Ground_state
 export CTR!                              #虚时演化
 
 using ..TDQMC
-using ..TDQMC.Crank_Nicolson
 using ..TDQMC.Potential_Matrix
+using ..TDQMC.Crank_Nicolson
+using ..TDQMC.Trajectory
 using ..TDQMC.Quantity
 
 using SparseArrays, CSV, DataFrames, NumericalIntegration
 
-function record(P::Parameter, Dy::Dynamics)                                      #这个函数虽然和function_1里的函数同名但是作用域是隔离的
-    local df = DataFrame()
+function record(Dy::Dynamics)                                      #这个函数虽然和function_1里的函数同名但是作用域是隔离的
+    local df = DataFrame(Dy.Trajectory, :auto)
 
-    df.x = P.sampling
-    df.wave = Dy.real_space
     CSV.write("Ground_state.csv", df)
 end
 
@@ -44,7 +43,7 @@ function CTR!(P::Parameter, Dy::Dynamics, serial_num::Integer;
             if sum(@. abs(Trajectory_past - Vec_Trajectory)) >= 1e-3                      #用轨迹判断终止条件, 到最后应该有粒子的轨迹前后变化很小
                 Trajectory_past[:] = Vec_Trajectory
                 #正态分布函数本身就是归一化的,所以第一次运行的时候,wave_past是归一化的
-                Movement!(P, Dy, serial_num, dt = P.Δt / ifelse(i == 1, 2.0, 1.0))
+                Movement!(P, Dy, serial_num, dt = P.Δt / ifelse(count == 0, 2.0, 1.0))
 
                 Reset_matrix!(P, Dy, serial_num, Change_matrix_former, Change_matrix_later)
                 Construct_matrix!(P, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
@@ -57,15 +56,15 @@ function CTR!(P::Parameter, Dy::Dynamics, serial_num::Integer;
                 #这里为了节省计算资源,对动量波函数通过矢量除法进行归一化
                 count += 1
             else
-                Dy.Time = -count * P.Δt
-                println("The Energy is ", eigen_energy(P, Dy))
+
+                Dy.Time = count * P.Δt
                 break
             end
 
         end
 
-        record(P, Wave)                         #这里结束后说明迭代得到了稳定的波函数
-        println("组别:$(serial_num),迭代次数:$(count),虚时间$(Dy.Time)")
+        #record(P, Wave)                         #这里结束后说明迭代得到了稳定的波函数
+
 
     else
         return @error "the Time shold be a imaginary number"

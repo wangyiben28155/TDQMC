@@ -41,7 +41,7 @@ end
 
 function Slater_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)           #通过此函数得到交叉关联的波函数, 按理来说有多少个电子就应该有多少个坐标,对应Electron_num维度的电子波函数
     local Type_2 = eltype(eltype(Dy.Guide_Wave))
-    local Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex} = (zeros(Type_2, P.electron), zeros(Type_1, P.electron))
+    local Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex} = (zeros(Type_2, P.electron), zeros(Type_2, P.electron))
     local symmetric_determinate::Matrix{<:Complex} = zeros(Type_2, (P.electron, P.electron))
     local Derivate_eachcoodinate::Matrix{<:Complex} = zeros(Type_2, (P.electron, P.electron))
 
