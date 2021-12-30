@@ -5,9 +5,9 @@ export Dynamics, Parameter, parallel_Evolution!, parallel_CTR!
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
 import Base.@kwdef
 
-const Ensemble_num, Electron_num = (100, 1)                                 #设定一些计算的参数
+const Ensemble_num, Electron_num = (50, 1)                                 #设定一些计算的参数
 const L, x_num, step_t = (350.0, 1751, 13001)
-const μ, σ = (LinRange(-(Electron_num - 1) / 2, (Electron_num - 1) / 2, Electron_num), 30)       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
+const μ, σ = (LinRange(-(Electron_num - 1) / 2, (Electron_num - 1) / 2, Electron_num), 10)       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
 const spin = [1, -1]
 
 
@@ -40,10 +40,10 @@ end
     Spin::Vector{T2} = spin
     space_N::T2 = x_num                                                       #划分的格点的总数,后面做离散傅里叶变换的时候会用得到
     scope::T1 = L                                                             #确定波函数的计算范围为-scope到+scope
-    Δx::T1 = 2 * scope / (N - 1)                                              #波函数的离散的空间间隔
-    Square_Δx::T1 = 2 * (P.Δx)^2
+    Δx::T1 = 2 * scope / (space_N - 1)                                              #波函数的离散的空间间隔
+    Square_Δx::T1 = 2 * (Δx)^2
     sampling::LinRange{T1} = LinRange(-scope, scope, space_N)
-    Δt::Union{T1,Complex{T1}} = 0.05                                          #划分的时间间隔, 尝试时间迭代区间, 因为考虑到虚时演化, 所以类型设定为复数
+    Δt::Union{T1,Complex{T1}} = 0.05 + 0.05im                                          #划分的时间间隔, 尝试时间迭代区间, 因为考虑到虚时演化, 所以类型设定为复数
     step_t::T2 = step_t
 end
 

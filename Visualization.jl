@@ -63,4 +63,7 @@ end
 
 function plot_Trajectory(P::Parameter)              #只是为了展示一下粒子的轨迹运动随时间的变化
     local df = CSV.read("Tra")
+
+end
+
 end

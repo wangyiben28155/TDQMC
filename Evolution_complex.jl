@@ -5,9 +5,9 @@ export CTR!                              #虚时演化
 using ..TDQMC
 using ..TDQMC.Crank_Nicolson
 using ..TDQMC.Potential_Matrix
-using ..TDQMC.physical_quantity
+using ..TDQMC.Quantity
 
-using CSV, DataFrames, NumericalIntegration
+using SparseArrays, CSV, DataFrames, NumericalIntegration
 
 function record(P::Parameter, Dy::Dynamics)                                      #这个函数虽然和function_1里的函数同名但是作用域是隔离的
     local df = DataFrame()
@@ -23,7 +23,7 @@ end
 
 
 function CTR!(P::Parameter, Dy::Dynamics, serial_num::Integer;
-            later_fix::SparseMatrixCSC, former_fix::SparseMatrixCSC)
+    later_fix::SparseMatrixCSC, former_fix::SparseMatrixCSC)
 
     local count::Int64 = 0
 

@@ -3,6 +3,7 @@ module Parallelize                             #这个模块是用来并行化�
 export parallel_Evolution!, parallel_CTR!
 
 using ..TDQMC
+using ..TDQMC.Potential_Matrix
 using ..TDQMC.Evolution
 using ..TDQMC.Ground_state
 using ..TDQMC.Quantity
@@ -25,7 +26,7 @@ function parallel_Evolution!(P::Parameter, Dy::Dynamics)
         CN_Evolution!(P, Dy, i, later_fix = later_fix, former_fix = former_fix)
         @inbounds Thread_workload[threadid()] += 1
         println(Thread_workload)
-        Group_Energy(P, Dy, i)
+        @inbounds Dy.Energy[i] = Group_Energy(P, Dy, i)
     end
 
     println("Caiculation is over!")
@@ -45,9 +46,9 @@ function parallel_CTR!(P::Parameter, Dy::Dynamics)
 
     @threads for i = 1:P.Group
         CTR!(P, Dy, i, later_fix = later_fix, former_fix = former_fix)
+        @inbounds Dy.Energy[i] = Group_Energy(P, Dy, i)
         @inbounds Thread_workload[threadid()] += 1
         println(Thread_workload)
-        Group_Energy(P, Dy, i)
     end
 
     println("Caiculation is over!")
