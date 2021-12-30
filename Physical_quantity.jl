@@ -14,9 +14,10 @@ V_ee(x_difference::T; β::T = 1.0) where {T<:AbstractFloat} = 1.0 / sqrt(β + x_
 
 
 function kinetic_part(P::Parameter, Dy::Dynamics, serial_num::Integer)
+    local k = 5                                                                             #这里指定的插值点的个数
     local Type = eltype(eltype(Dy.Guide_Wave))
     local location_vec::Vector = Dy.Trajectory[:, serial_num]
-    local indexVec_k::Vector{<:UnitRange{<:Integer}} = find_k_index.(location_vec, x = P.sampling, k = 5)
+    local indexVec_k::Vector{<:UnitRange{<:Integer}} = find_k_index.(location_vec, x = P.sampling, k = k)
     local k_itp_Wave_Vec::Vector{<:Vector{<:Complex}} = [zeros(Type, k) for i = 1:P.electron]    #选取的五个轨迹点最近邻点的波函数的值
     local derivative_Wave_Vec::Vector{<:Vector{<:Complex}} = deepcopy(k_itp_Wave_Vec)
     local Vector_Interp::Vector{<:Complex} = zeros(Type, P.electron)
@@ -31,12 +32,12 @@ function kinetic_part(P::Parameter, Dy::Dynamics, serial_num::Integer)
     for i = 1:P.electron
         interp_cubic_1 = CubicSplineInterpolation(P.sampling[indexVec_k[i]], k_itp_Wave_Vec[i])
         interp_cubic_2 = CubicSplineInterpolation(P.sampling[indexVec_k[i]], derivative_Wave_Vec[i])
-        Vector_Interp[i] = interp_cubic_1(localtion_vec[i])
-        Vector_Interp_derv[i] = interp_cubic_2(localtion_vec[i])
+        Vector_Interp[i] = interp_cubic_1(location_vec[i])
+        Vector_Interp_derv[i] = interp_cubic_2(location_vec[i])
     end
 
 
-    return sum(Vector_Interp_derv ./ Vector_Interp)
+    return real(sum(Vector_Interp_derv ./ Vector_Interp))               #这里要取实数,是因为最后能量计算得到的值为实数,有虚部是因为波函数最后还是带有一定的虚部, 影响最后的计算结果
 
 end
 
