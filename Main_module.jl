@@ -1,11 +1,11 @@
 module TDQMC
 
-export Dynamics, Parameter, Movement!, CN_Evolution!, parallel_Evolution!
+export Dynamics, Parameter, parallel_Evolution!, parallel_CTR!
 
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
 import Base.@kwdef
 
-const Ensemble_num, Electron_num = (50, 1)                                 #设定一些计算的参数
+const Ensemble_num, Electron_num = (100, 1)                                 #设定一些计算的参数
 const L, x_num, step_t = (350.0, 1751, 13001)
 const μ, σ = (LinRange(-(Electron_num - 1) / 2, (Electron_num - 1) / 2, Electron_num), 30)       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
 const spin = [1, -1]
@@ -53,10 +53,10 @@ include("Potential.jl")
 include("Physical_quantity.jl")
 include("Crank_Nicolson.jl")
 include("Trajectory.jl")
-include("visualization.jl")
 include("Evolution.jl")
 include("Evolution_complex.jl")
 include("Parallel_Calculation.jl")
+include("visualization.jl")
 
 
 using .Evolution

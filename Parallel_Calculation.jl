@@ -1,6 +1,6 @@
 module Parallelize                             #这个模块是用来并行化的
 
-export parallel_Evolution!
+export parallel_Evolution!, parallel_CTR!
 
 using ..TDQMC
 using ..TDQMC.Evolution
@@ -22,13 +22,13 @@ function parallel_Evolution!(P::Parameter, Dy::Dynamics)
 
     #这里对固定的构造参数使用传参, 而不在函数原来本身内部定义, 避免储存空间的浪费, 这些改动是在所有函数写好之后进行的更改
     @threads for i = 1:P.Group
-        CN_Evolution!(P, Dy, i, later_fix= later_fix, former_fix= former_fix)
+        CN_Evolution!(P, Dy, i, later_fix = later_fix, former_fix = former_fix)
         @inbounds Thread_workload[threadid()] += 1
         println(Thread_workload)
         Group_Energy(P, Dy, i)
     end
 
-    println("Caiculation is over!") 
+    println("Caiculation is over!")
 
 end
 
@@ -44,7 +44,7 @@ function parallel_CTR!(P::Parameter, Dy::Dynamics)
 
 
     @threads for i = 1:P.Group
-        CTR!(P, Dy, i, later_fix= later_fix, former_fix= former_fix)   
+        CTR!(P, Dy, i, later_fix = later_fix, former_fix = former_fix)
         @inbounds Thread_workload[threadid()] += 1
         println(Thread_workload)
         Group_Energy(P, Dy, i)
