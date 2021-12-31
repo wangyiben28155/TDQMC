@@ -36,24 +36,25 @@ function CTR!(P::Parameter, Dy::Dynamics, serial_num::Integer;
 
         while true
 
-            if sum(@. abs(Trajectory_past - Vec_Trajectory)) >= 1e-5                      #用轨迹判断终止条件, 到最后应该有粒子的轨迹前后变化很小
+            if sum(@. abs(Trajectory_past - Vec_Trajectory)) >= 1e-5                     #用轨迹判断终止条件, 到最后应该有粒子的轨迹前后变化很小
                 Trajectory_past[:] = Vec_Trajectory
                 #正态分布函数本身就是归一化的,所以第一次运行的时候,wave_past是归一化的
-                Movement!(P, Dy, serial_num, dt = P.Δt / ifelse(count == 0, 2.0, 1.0))
-
+            
                 Reset_matrix!(P, Dy, serial_num, Change_matrix_former, Change_matrix_later)
                 Construct_matrix!(P, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
-
+            
                 Vec_wave[:] = Change_matrix_former .* Vec_wave
                 Vec_wave[:] = Change_matrix_later .\ Vec_wave
-
+            
                 Normalizer .= Normalization(P, Dy, serial_num)                                  #因为要重复使用,这里应该需要储存到一个变量里比较好.
                 Vec_wave ./= Normalizer
-                                                        
+            
+                Movement!(P, Dy, serial_num, dt = P.Δt)
+            
                 count += 1
             else
-
-                Dy.Time = count * P.Δt
+            
+                Dy.Time[serial_num] = count * P.Δt
                 break
             end
 

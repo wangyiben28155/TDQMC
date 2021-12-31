@@ -50,7 +50,7 @@ function parallel_CTR!(P::Parameter, Dy::Dynamics)
     local former_fix::SparseMatrixCSC = spdiagm(-1 => -Constructure, 1 => -Constructure, 0 => (λ + 2.0) .+ P.Square_Δx .* V_ne.(P.sampling))
 
 
-    for i = 1:P.Group
+    @threads for i = 1:P.Group
         CTR!(P, Dy, i, later_fix = later_fix, former_fix = former_fix)
         Dy.Energy[i] = Group_Energy(P, Dy, i)
         Thread_workload[threadid()] += 1

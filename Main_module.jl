@@ -1,6 +1,6 @@
 module TDQMC
 
-export Dynamics, Parameter, parallel_Evolution!, parallel_CTR!
+export Dynamics, Parameter, parallel_Evolution!, parallel_CTR!, plot_Ground
 
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
 import Base.@kwdef
@@ -30,7 +30,7 @@ end
     Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = [initializer_guideWave(i) for i in 1:Electron_num, j in 1:Ensemble_num]     #这里得到的分布是概率密度的开平方作为初始的波函数
     #进行演化
     Energy::Vector{T} = zeros(T, Ensemble_num)
-    Time::Union{T,Complex{T}} = 0.0
+    Time::Vector{Union{T,Complex{T}}} = zeros(Complex{T}, Ensemble_num)
 end
 
 
@@ -43,7 +43,7 @@ end
     Δx::T1 = 2 * scope / (space_N - 1)                                              #波函数的离散的空间间隔
     Square_Δx::T1 = 2 * (Δx)^2
     sampling::LinRange{T1} = LinRange(-scope, scope, space_N)
-    Δt::Union{T1,Complex{T1}} = 0.05 + 0.05im                                          #划分的时间间隔, 尝试时间迭代区间, 因为考虑到虚时演化, 所以类型设定为复数
+    Δt::Union{T1,Complex{T1}} = 0.05 - 0.05im                                          #划分的时间间隔, 尝试时间迭代区间, 因为考虑到虚时演化, 所以类型设定为复数
     step_t::T2 = step_t
 end
 
@@ -63,5 +63,8 @@ using .Evolution
 using .Trajectory
 using .Quantity
 using .Parallelize
+using .visual
+
+
 
 end
