@@ -36,7 +36,7 @@ function CTR!(P::Parameter, Dy::Dynamics, serial_num::Integer;
 
         while true
 
-            if sum(@. abs(Trajectory_past - Vec_Trajectory)) >= 1e-5                     #用轨迹判断终止条件, 到最后应该有粒子的轨迹前后变化很小
+            if sum(@. abs(Trajectory_past - Vec_Trajectory)) >= 1e-15                     #用轨迹判断终止条件, 到最后应该有粒子的轨迹前后变化很小
                 Trajectory_past[:] = Vec_Trajectory
                 #正态分布函数本身就是归一化的,所以第一次运行的时候,wave_past是归一化的
             
