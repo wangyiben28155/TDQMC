@@ -72,7 +72,16 @@ end
 
 
 function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer; dt = P.Δt)                     # 这里我们使用欧拉法即可
-    Dy.Trajectory[:, serial_num] .+= real(dt) * Velocity(P, Dy, serial_num)
+    local Vec_Trajectory = view(Dy.Trajectory, :, serial_num)
+    local OutBoundary_index::Vector{<:Integer} = Int64[]
+
+    Vec_Trajectory[:] .+= real(dt) * Velocity(P, Dy, serial_num)
+    OutBoundary_index = findall(x -> abs(x) > P.scope, Vec_Trajectory)
+    if isempty(OutBoundary_index)
+        return nothing
+    else
+        Vec_Trajectory[OutBoundary_index] = sign.(Vec_Trajectory[OutBoundary_index]) * P.scope
+    end
 end
 
 

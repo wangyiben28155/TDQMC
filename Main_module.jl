@@ -6,7 +6,7 @@ using Distributions, Random, SparseArrays                                   #用
 import Base.@kwdef
 
 const Ensemble_num, Electron_num = (1000, 1)                                 #设定一些计算的参数
-const L, x_num, step_t = (350.0, 1751, 13001)
+const L, x_num, step_t, Δt = (200.0, 20001, 13001, 0.05 - 0.01im)
 const μ, σ = (LinRange(-(Electron_num - 1) / 2, (Electron_num - 1) / 2, Electron_num), 10)       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
 const spin = [1, -1]
 
@@ -30,7 +30,7 @@ end
     Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = [initializer_guideWave(i) for i in 1:Electron_num, j in 1:Ensemble_num]     #这里得到的分布是概率密度的开平方作为初始的波函数
     #进行演化
     Energy::Vector{T} = zeros(T, Ensemble_num)
-    Time::Vector{Union{T,Complex{T}}} = zeros(Complex{T}, Ensemble_num)
+    Time::Vector{Union{T,Complex{T}}} = zeros(typeof(Δt), Ensemble_num)
 end
 
 
@@ -43,7 +43,7 @@ end
     Δx::T1 = 2 * scope / (space_N - 1)                                              #波函数的离散的空间间隔
     Square_Δx::T1 = 2 * (Δx)^2
     sampling::LinRange{T1} = LinRange(-scope, scope, space_N)
-    Δt::Union{T1,Complex{T1}} = 0.05 - 0.05im                                          #划分的时间间隔, 尝试时间迭代区间, 因为考虑到虚时演化, 所以类型设定为复数
+    Δt::Union{T1,Complex{T1}} = Δt                                         #划分的时间间隔, 尝试时间迭代区间, 因为考虑到虚时演化, 所以类型设定为复数
     step_t::T2 = step_t
 end
 
