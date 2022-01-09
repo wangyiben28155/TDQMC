@@ -21,7 +21,6 @@ function parallel_Evolution!(P::Parameter, Dy::Dynamics)
     local Threads_num::Integer = nthreads()
     local Thread_workload::Vector{<:Integer} = zeros(typeof(Threads_num), Threads_num)         #注意这里有数据竞争, 等下需要修改使用锁或者原子操作
 
-
     local λ = P.Square_Δx * 1im / P.Δt
     local Constructure = ones(typeof(λ), P.space_N - 1)
     local later_fix::SparseMatrixCSC = spdiagm(-1 => Constructure, 1 => Constructure, 0 => (λ - 2.0) .- P.Square_Δx .* V_ne.(P.sampling))
