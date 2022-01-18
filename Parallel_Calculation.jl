@@ -11,11 +11,12 @@ using ..TDQMC.Quantity
 using Base.Threads, SparseArrays, CSV, DataFrames
 
 
-function record_Ground(Dy::Dynamics)                                      #这个函数虽然和function_1里的函数同名但是作用域是隔离的
+function record_Ground(Dy::Dynamics)           #这个函数虽然和function_1里的函数同名但是作用域是隔离的
     local df = DataFrame(Dy.Trajectory, :auto)
 
     CSV.write("Ground_Trajectory.csv", df)
 end
+
 
 function parallel_Evolution!(P::Parameter, Dy::Dynamics)
     local Threads_num::Integer = nthreads()
