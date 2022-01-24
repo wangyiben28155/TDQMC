@@ -47,7 +47,7 @@ end
 function potential_part(P::Parameter, Dy::Dynamics, serial_num::Integer)
     local location_vec::Vector = Dy.Trajectory[:, serial_num]
     local potential_vec::Vector = V_ne.(location_vec)       #核的势能项
-    local location_Matrix::Matrix = repeat(location_vec', outer = (2, 1)) .- repeat(location_vec, outer = (1, 2))
+    local location_Matrix::Matrix = repeat(location_vec', outer = (P.electron, 1)) - repeat(location_vec, outer = (1, P.electron))
     local interaction_energy::AbstractFloat = 0.0
 
     for i = 1:P.electron-1

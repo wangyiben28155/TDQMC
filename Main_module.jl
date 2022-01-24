@@ -1,12 +1,12 @@
 module TDQMC
 
-export Dynamics, Parameter, parallel_Evolution!, parallel_CTR!, plot_Ground
+export Dynamics, Parameter, parallel_Evolution!, parallel_CTE!, plot_Ground
 
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
 import Base.@kwdef
 
-const Ensemble_num, Electron_num = (200, 1)                                 #设定一些计算的参数
-const L, x_num, step_t, Δt = (200.0, 20001, 3000, 0.05 - 0.01im)
+const Ensemble_num, Electron_num = (500, 1)                                 #设定一些计算的参数
+const L, x_num, step_t, Δt = (200.0, 20001, 3000, 0.05 - 0.05im)
 const μ, σ = (LinRange(-(Electron_num - 1) / 2, (Electron_num - 1) / 2, Electron_num), 3)       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
 const spin = [1, -1]
 
@@ -41,7 +41,7 @@ end
     space_N::T2 = x_num                                                       #划分的格点的总数,后面做离散傅里叶变换的时候会用得到
     scope::T1 = L                                                             #确定波函数的计算范围为-scope到+scope
     Δx::T1 = 2 * scope / (space_N - 1)                                              #波函数的离散的空间间隔
-    Square_Δx::T1 = 2 * (Δx)^2
+    Twice_Δx²::T1 = 2.0 * (Δx)^2
     sampling::LinRange{T1} = LinRange(-scope, scope, space_N)
     Δt::Union{T1,Complex{T1}} = Δt                                         #划分的时间间隔, 尝试时间迭代区间, 因为考虑到虚时演化, 所以类型设定为复数
     step_t::T2 = step_t

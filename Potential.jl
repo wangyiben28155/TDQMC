@@ -30,7 +30,7 @@ function Vtd_Operator(x_t::Vector{T}, P::Parameter, t::Union{T,Complex{T}};
 
     Matrix_td .+= repeat(Field(t) .* P.sampling, outer = (1, P.electron))     #偶极近似下与电场相互作用的势能项,这里因为选择的电场为零,这样省去的计算的时间,之后电场不为零的情况下可以把判断的条件给去掉
 
-    return Matrix_td
+    return Matrix_td                                            #返回的是随时间变化的势能矩阵,矩阵的每一列代表的是每一个电子受到的势能作用(除原子核之外)
 end
 
 end
