@@ -7,10 +7,21 @@ using ..TDQMC.Discrete_Func_diff
 using ..TDQMC.Find_nearest_k
 using ..TDQMC.Potential_Matrix: V_ne
 
-using Interpolations, LinearAlgebra
+using Interpolations, LinearAlgebra, SparseArrays
 
 #在另一个模块两个类似的函数是用来计算矢量的
-V_ee(x_difference::T; β::T = 1.0) where {T<:AbstractFloat} = 1.0 / sqrt(β + x_difference^2)
+V_ee(x_difference::T; β::T = 0.2) where {T<:AbstractFloat} = 1.0 / sqrt(β + x_difference^2)
+
+
+@inline function sptril(A::Matrix, n::Int)
+    return sparse(tril(A, n))
+end
+
+@inline function relative(A::AbstractVector)
+    return repeat(A', outer=(length(A), 1)) - repeat(A, outer=(1, length(A)))
+end
+
+
 
 
 function kinetic_part(P::Parameter, Dy::Dynamics, serial_num::Integer)
@@ -42,16 +53,14 @@ function kinetic_part(P::Parameter, Dy::Dynamics, serial_num::Integer)
 end
 
 
-
-
 function potential_part(P::Parameter, Dy::Dynamics, serial_num::Integer)
     local location_vec::Vector = Dy.Trajectory[:, serial_num]
     local potential_vec::Vector = V_ne.(location_vec)       #核的势能项
-    local location_Matrix::Matrix = repeat(location_vec', outer = (P.electron, 1)) - repeat(location_vec, outer = (1, P.electron))
+    local location_Matrix::SparseMatrixCSC = sptril(relative(location_vec), 0)
     local interaction_energy::AbstractFloat = 0.0
 
     for i = 1:P.electron-1
-        interaction_energy += sum(V_ee.(diag(location_Matrix, i)))    #这一部分是电子与电子之间相互作用的能量
+        interaction_energy += sum(V_ee.(diag(location_Matrix, -i)))    #这一部分是电子与电子之间相互作用的能量
     end
 
     interaction_energy += sum(potential_vec)

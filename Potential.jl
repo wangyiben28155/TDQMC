@@ -9,7 +9,7 @@ const ω_0 = 0.148
 
 # 导波函数部分
 V_ne(x::T; α::T = 1.0) where {T<:AbstractFloat} = -1.0 / sqrt(α + x^2)                         #定义势能项, 因为这里不需要对矩阵进行运算, 就不需要用
-V_ee(x_t::T; x::AbstractVector{T}, β::T = 1.0) where {T<:AbstractFloat} = @. 1.0 / sqrt(β + (x - x_t)^2)
+V_ee(x_t::T; x::AbstractVector{T}, β::T = 0.2) where {T<:AbstractFloat} = @. 1.0 / sqrt(β + (x - x_t)^2)
 
 Envelope(t::T; T_0::T = 2pi / ω_0, ξ_0::T = 0.1) where {T<:AbstractFloat} = t <= 3 * T_0 ? ξ_0 * sin(pi * t / (6 * T_0))^2 : ξ_0
 Electric_Field(t::T; ϵ::Function = Envelope, ω::T = ω_0) where {T<:AbstractFloat} = ϵ(t) * sin(ω * t)   #定义电场
@@ -23,6 +23,7 @@ function Vee_Operator(x_t::Vector{T}, P::Parameter) where {T<:AbstractFloat}    
 
     return Matrix_Vee
 end
+
 
 function Vtd_Operator(x_t::Vector{T}, P::Parameter, t::Union{T,Complex{T}};
      Field::Function = t::Union{T,Complex{T}} -> 0.0) where {T<:AbstractFloat} #随时间变化的势能项, 这里之所以拆开是为了方便后面的矩阵构造时候能更节省时间

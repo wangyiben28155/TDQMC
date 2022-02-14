@@ -11,7 +11,6 @@ using ..TDQMC.Quantity
 using SparseArrays, NumericalIntegration
 
 
-
 @inline function Normalization(P::Parameter, Dy::Dynamics, serial_num::Integer)
     return sqrt.(integrate(P.sampling, abs2.(hcat(Dy.Guide_Wave[:, serial_num])...), SimpsonEven()))
 end
