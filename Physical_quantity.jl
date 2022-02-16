@@ -82,7 +82,7 @@ function dipole_HHG(P::Parameter, Dy::Dynamics)
 end
 
 function acc_HHG(P::Parameter, Dy::Dynamics)
-
+    
 
 
 

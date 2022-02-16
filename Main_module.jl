@@ -6,7 +6,7 @@ using Distributions, Random, SparseArrays                                   #用
 import Base.@kwdef
 
 const Ensemble_num, Electron_num = (200, 1)                                 #设定一些计算的参数
-const L, x_num, step_t, Δt = (200.0, 20001, 3000, 0.05 - 0.05im)
+const L, x_num, step_t, Δt = (200.0, 20001, 300, 0.05 - 0.05im)
 const μ, σ = (LinRange(-(Electron_num - 1) / 2, (Electron_num - 1) / 2, Electron_num), 3)       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
 const spin = [1, -1]
 
@@ -31,7 +31,7 @@ end
     #进行演化
     Energy::Vector{T} = zeros(T, Ensemble_num)
     Time::Vector{Union{T,Complex{T}}} = zeros(typeof(Δt), Ensemble_num)
-    Displace::Array{T,3} = zeros(T, (step_t, Ensemble_num, Electron_num))
+    Displace::Array{T,3} = zeros(T, (step_t+1, Ensemble_num, Electron_num))
 end
 
 
