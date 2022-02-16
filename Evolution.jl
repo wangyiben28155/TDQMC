@@ -29,8 +29,8 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int;
     if imag(P.Δt) == 0.0
     
         for i = 1:P.step_t
-        
-        
+            Dy.Displace[i,:,:] = Dy.Trajectory'
+            
             Reset_matrix!(P, Dy, serial_num, Change_matrix_former, Change_matrix_later)
             Construct_matrix!(P, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
         

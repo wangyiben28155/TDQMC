@@ -4,7 +4,12 @@ export Movement!
 
 using ..TDQMC
 using ..TDQMC.Find_nearest_k
+
 using Interpolations, LinearAlgebra   #然后对不在格点上的轨迹进行插值求得其导数等等
+
+@inline function thermalization(t::Complex; cut_off = 15.0, amp = 1.0)            #衰减振幅包络
+    return imag(t) >= cut_off ? 0.0 : amp * (1.0 - imag(t) / 15.0)
+end
 
 
 function find_lattice_wave(Particle_num::Integer, serial_num::Integer, P::Parameter, Dy::Dynamics; k::Integer = 5)    #这个对应的是粒子的轨迹矢量,用来得到相应的波函数插值的部分
@@ -76,7 +81,13 @@ function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer; dt = P.Δt) 
     local OutBoundary_index::Vector{<:Integer} = Int64[]
 
     Vec_Trajectory[:] .+= real(dt) * Velocity(P, Dy, serial_num)
-    OutBoundary_index = findall(x -> abs(x) > P.scope, Vec_Trajectory)
+
+    if imag(dt) != 0                          #这一部分是为了在寻找基态的过程中避免quantum dift,使用线性衰减的随机数
+        Vec_Trajectory[:] += 0.5 * thermalization(Dy.Time[serial_num]) * (rand(P.electron) .- 0.5)
+    end
+
+    OutBoundary_index = findall(x -> abs(x) > P.scope, Vec_Trajectory)       #下面的部分是为了将超过边界的粒子停留在边界
+
     if isempty(OutBoundary_index)
         return nothing
     else

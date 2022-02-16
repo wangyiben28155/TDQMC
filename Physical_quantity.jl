@@ -1,13 +1,13 @@
 module Quantity
 
-export Group_Energy
+export Group_Energy, HHG
 
 using ..TDQMC
 using ..TDQMC.Discrete_Func_diff
 using ..TDQMC.Find_nearest_k
 using ..TDQMC.Potential_Matrix: V_ne
 
-using Interpolations, LinearAlgebra, SparseArrays
+using Interpolations, LinearAlgebra, SparseArrays, FFTW
 
 #在另一个模块两个类似的函数是用来计算矢量的
 V_ee(x_difference::T; β::T = 0.2) where {T<:AbstractFloat} = 1.0 / sqrt(β + x_difference^2)
@@ -74,12 +74,18 @@ function Group_Energy(P::Parameter, Dy::Dynamics, serial_num::Integer)
 end
 
 
-function TD_dipole!()
+function dipole_HHG(P::Parameter, Dy::Dynamics)
+     
 
+     
 
 end
 
-function acceleration()
+function acc_HHG(P::Parameter, Dy::Dynamics)
+
+
+
+
 
 end
 
