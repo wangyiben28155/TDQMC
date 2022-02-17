@@ -11,13 +11,6 @@ using ..TDQMC.Quantity
 using SparseArrays
 
 
-function record(P::Parameter, Dy::Dynamics)                                      #这个函数虽然和function_1里的函数同名但是作用域是隔离的
-    local df = DataFrame()
-    
-
-end
-
-
 function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int;
     later_fix::SparseMatrixCSC, former_fix::SparseMatrixCSC)         #计算的是某一个时刻的一组系综粒子的演化矩阵, 相当于对应每一个系综粒子的波函数, 这里使用的数据结构为对应每一个系综粒子, 每一个系综粒子有空间划分格点这么多的n×n的稀疏矩阵, 内部元素的非零元素的个数大概为3n
 

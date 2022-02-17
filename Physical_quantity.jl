@@ -23,7 +23,6 @@ end
 
 
 
-
 function kinetic_part(P::Parameter, Dy::Dynamics, serial_num::Integer)
     local k = 5                                                                             #这里指定的插值点的个数
     local Type = eltype(eltype(Dy.Guide_Wave))
@@ -48,7 +47,7 @@ function kinetic_part(P::Parameter, Dy::Dynamics, serial_num::Integer)
     end
 
 
-    return real(sum(Vector_Interp_derv ./ Vector_Interp))               #这里要取实数,是因为最后能量计算得到的值为实数,有虚部是因为波函数最后还是带有一定的虚部, 影响最后的计算结果
+    return (-1/2) * real(sum(Vector_Interp_derv ./ Vector_Interp))               #这里要取实数,是因为最后能量计算得到的值为实数,有虚部是因为波函数最后还是带有一定的虚部, 影响最后的计算结果
 
 end
 
@@ -76,23 +75,36 @@ end
 
 function dipole_HHG(P::Parameter, Dy::Dynamics)
     local a, b, c = size(Dy.Displace)                               #第一维为对时间的采样, 第二维为系综数,需要进行求和取平均,第三维为电子数
+    local Type_0 = eltype(Dy.Displace)
     local floor_a = floor(Int, a / 2)
     local fₛ = a / (P.step_t * real(P.Δt))
-    local Discrete_ft = zeros(ComplexF64, floor_a + 1, b, c)        #预置元素为复数的数组
-    local Total_ft = zeros(ComplexF64, floor_a + 1, c)
+    local Discrete_ft = zeros(Complex{Type_0}, floor_a + 1, b, c)        #预置元素为复数的数组
+    local Total_ft = zeros(Complex{Type_0}, floor_a + 1, c)
 
     Discrete_ft[:, :, :] = rfft(Dy.Displace, 1)
     Total_ft[:, :] = sum(Discrete_ft, dims = 2) / b                 #对每个粒子的轨迹进行DFT之后求和之后取平均
 
-    return rfftfreq(a, fₛ),Total_ft
+    return rfftfreq(a, fₛ), Total_ft
 end
 
+
 function acc_HHG(P::Parameter, Dy::Dynamics)
-    
+    local a, b, c = size(Dy.Displace)                               #第一维为对时间的采样, 第二维为系综数,需要进行求和取平均,第三维为电子数
+    local Type_0 = eltype(Dy.Displace)
+    local floor_a = floor(Int, a / 2)
+    local fₛ = a / (P.step_t * real(P.Δt))
+    local Discrete_a = zeros(Complex{Type_0}, a, b, c)
+    local Discrete_ft = zeros(Complex{Type_0}, floor_a + 1, b, c)        #预置元素为复数的数组
+    local Total_ft = zeros(Complex{Type_0}, floor_a + 1, c)
 
+    for j in 1:c, i in 1:b
+        Discrete_a[:, i, j] = Derivative_2(Dy.Displace[:, i, j], dL = P.Δx)
+    end
 
+    Discrete_ft[:, :, :] = rfft(Discrete_a, 1)
+    Total_ft[:, :] = sum(Discrete_ft, dims = 2) / b                 #对每个粒子的轨迹进行DFT之后求和之后取平均
 
-
+    return rfftfreq(a, fₛ), Total_ft
 end
 
 
