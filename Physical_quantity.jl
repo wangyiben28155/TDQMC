@@ -1,6 +1,6 @@
 module Quantity
 
-export Group_Energy, HHG
+export Group_Energy, dipole_HHG
 
 using ..TDQMC
 using ..TDQMC.Discrete_Func_diff
@@ -75,10 +75,16 @@ end
 
 
 function dipole_HHG(P::Parameter, Dy::Dynamics)
-     
+    local a, b, c = size(Dy.Displace)                               #第一维为对时间的采样, 第二维为系综数,需要进行求和取平均,第三维为电子数
+    local floor_a = floor(Int, a / 2)
+    local fₛ = a / (P.step_t * real(P.Δt))
+    local Discrete_ft = zeros(ComplexF64, floor_a + 1, b, c)        #预置元素为复数的数组
+    local Total_ft = zeros(ComplexF64, floor_a + 1, c)
 
-     
+    Discrete_ft[:, :, :] = rfft(Dy.Displace, 1)
+    Total_ft[:, :] = sum(Discrete_ft, dims = 2) / b                 #对每个粒子的轨迹进行DFT之后求和之后取平均
 
+    return rfftfreq(a, fₛ),Total_ft
 end
 
 function acc_HHG(P::Parameter, Dy::Dynamics)

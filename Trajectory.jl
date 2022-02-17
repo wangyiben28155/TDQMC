@@ -8,7 +8,7 @@ using ..TDQMC.Find_nearest_k
 using Interpolations, LinearAlgebra   #然后对不在格点上的轨迹进行插值求得其导数等等
 
 @inline function thermalization(t::Complex; cut_off = 15.0, amp = 1.0)            #衰减振幅包络
-    return imag(t) >= cut_off ? 0.0 : amp * (1.0 - imag(t) / cut_off)
+    return real(t) <= cut_off ?  amp * (1.0 - real(t) / cut_off) : 0.0
 end
 
 
@@ -79,12 +79,12 @@ end
 function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer; dt = P.Δt)                     # 这里我们使用欧拉法即可
     local Vec_Trajectory = view(Dy.Trajectory, :, serial_num)
     local OutBoundary_index::Vector{<:Integer} = Int64[]
-    local Total_time = P.step_t * imag(dt)
+    local Total_time = P.step_t * real(dt)
 
     Vec_Trajectory[:] .+= real(dt) * Velocity(P, Dy, serial_num)
 
-    if imag(dt) != 0                          #这一部分是为了在寻找基态的过程中避免quantum dift,使用线性衰减的随机数
-        Vec_Trajectory[:] += 0.1 * thermalization(Dy.Time[serial_num], cut_off = Total_time) * (rand(P.electron) .- 0.5)
+    if imag(dt) != 0.0                          #这一部分是为了在寻找基态的过程中避免quantum dift,使用线性衰减的随机数
+        Vec_Trajectory[:] .+= 0.1  * (rand(P.electron) .- 0.5) * thermalization(Dy.Time[serial_num], cut_off = Total_time)
     end
 
     OutBoundary_index = findall(x -> abs(x) > P.scope, Vec_Trajectory)       #下面的部分是为了将超过边界的粒子停留在边界
