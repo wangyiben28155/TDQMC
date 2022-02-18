@@ -92,7 +92,7 @@ function acc_HHG(P::Parameter, Dy::Dynamics)
     local a, b, c = size(Dy.Displace)                               #第一维为对时间的采样, 第二维为系综数,需要进行求和取平均,第三维为电子数
     local Type_0 = eltype(Dy.Displace)
     local floor_a = floor(Int, a / 2)
-    local fₛ = a / (P.step_t * real(P.Δt))
+    local fₛ = a / (P.step_t * real(P.Δt))                           #也就是N/t_sum
     local Discrete_a = zeros(Complex{Type_0}, a, b, c)
     local Discrete_ft = zeros(Complex{Type_0}, floor_a + 1, b, c)        #预置元素为复数的数组
     local Total_ft = zeros(Complex{Type_0}, floor_a + 1, c)

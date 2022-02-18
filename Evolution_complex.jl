@@ -23,8 +23,7 @@ function CT_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Integer;
     local Change_matrix_former::Vector{<:SparseMatrixCSC} = [spzeros(eltype(later_fix), P.space_N, P.space_N) for i = 1:P.electron]
     local Change_matrix_later::Vector{<:SparseMatrixCSC} = -deepcopy(Change_matrix_former)
 
-    #    local Vec_Trajectory = view(Dy.Trajectory, :, serial_num)
-    #    local Trajectory_past = zeros(eltype(Dy.Trajectory), P.electron)                                #用来记录波函数的历史轨迹,用来决定迭代停止的判断条件
+
     local Vec_wave = view(Dy.Guide_Wave, :, serial_num)
     local Vec_Trajectory = view(Dy.Trajectory, :, serial_num)
 
