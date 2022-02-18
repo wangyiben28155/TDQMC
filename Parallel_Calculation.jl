@@ -18,7 +18,7 @@ function record_Ground(Dy::Dynamics)           #这个函数虽然和function_1�
 end
 
 function record_GuideWave(P::Parameter, Dy::Dynamics)       #上面这两个函数是基态演化的时候用来记录的
-    local a,b = size(Dy.Guide_Wave)
+    local a, b = size(Dy.Guide_Wave)
     local A = reshape(Dy.Guide_Wave, a * b)
     local B = hcat(A...)
     local df = DataFrame(B, :auto)
@@ -28,9 +28,14 @@ function record_GuideWave(P::Parameter, Dy::Dynamics)       #上面这两个函�
     CSV.write("Ground_Guide_Wave.csv", df)
 end
 
-function record_Displace(P::Parameter, DY::Dynamics)
+function record_Displace(P::Parameter, Dy::Dynamics)
+    local a, b, c = size(Dy.Displace)
+    local A = reshape(Dy, (a, b * c))
+    local df = DataFrame(A, :auto)
 
+    df.t_range = P.Δt * (0:P.step_t)
 
+    CSV.write("Displace_Ensemble.csv", df)
 end
 
 
@@ -48,9 +53,8 @@ function parallel_Evolution!(P::Parameter, Dy::Dynamics)
         CN_Evolution!(P, Dy, i, later_fix = later_fix, former_fix = former_fix)
         Thread_workload[threadid()] += 1
         println(Thread_workload)
-        Dy.Energy[i] = Group_Energy(P, Dy, i)
     end
-
+    record_Displace(P, Dy)
     println("Caiculation is over!")
 
 end

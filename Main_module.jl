@@ -1,6 +1,6 @@
 module TDQMC
 
-export Dynamics, Parameter, extend_num, stitch!, parallel_Evolution!, parallel_CTE!, plot_Ground, 
+export Dynamics, Parameter, extend_num, stitch_Matrix, parallel_Evolution!, parallel_CTE!, plot_Ground, 
         Group_Energy, dipole_HHG, choose
 
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
