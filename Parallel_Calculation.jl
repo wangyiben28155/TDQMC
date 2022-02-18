@@ -17,26 +17,21 @@ function record_Ground(Dy::Dynamics)           #这个函数虽然和function_1�
     CSV.write("Ground_Trajectory.csv", df)
 end
 
+function record_GuideWave(P::Parameter, Dy::Dynamics)       #上面这两个函数是基态演化的时候用来记录的
+    local a,b = size(Dy.Guide_Wave)
+    local A = reshape(Dy.Guide_Wave, a * b)
+    local B = hcat(A...)
+    local df = DataFrame(B, :auto)
 
-# function Construct(P::Parameter)
-#     local λ = 2im * (P.Twice_Δx² / real(P.Δt))      #这个为虚数
-#     local λ₀ = 4 * (P.Twice_Δx² / -imag(P.Δt))       #这个为实数
-#     local Constructure = ones(typeof(λ), P.space_N - 1)
-#     local Section_A::SparseMatrixCSC = spdiagm(-1 => -Constructure, 1 => -Constructure, 0 => (λ₀ + 2.0) .- P.Twice_Δx² .* V_ne.(P.sampling))
-#     local Section_B::SparseMatrixCSC = spdiagm(-1 => Constructure, 1 => Constructure, 0 => (λ - 2.0) .- P.Twice_Δx² .* V_ne.(P.sampling))
-#     local Section_C::SparseMatrixCSC = spdiagm(-1 => Constructure, 1 => Constructure, 0 => (λ₀ - 2.0) .+ P.Twice_Δx² .* V_ne.(P.sampling))
-#     local Section_D::SparseMatrixCSC = spdiagm(-1 => -Constructure, 1 => -Constructure, 0 => (λ + 2.0) .+ P.Twice_Δx² .* V_ne.(P.sampling))
+    df.x_range = P.sampling 
+
+    CSV.write("Ground_Guide_Wave.csv", df)
+end
+
+function record_Displace(P::Parameter, DY::Dynamics)
 
 
-#     local later_op::SparseMatrixCSC = spzeros(typeof(λ), P.space_N, P.space_N)
-#     local former_op::SparseMatrixCSC = spzeros(typeof(λ), P.space_N, P.space_N)
-
-#     later_op = Section_A * Section_B * Section_A
-#     former_op = Section_C * Section_D * Section_C
-
-#     return later_op, former_op
-
-# end
+end
 
 
 function parallel_Evolution!(P::Parameter, Dy::Dynamics)
@@ -77,6 +72,7 @@ function parallel_CTE!(P::Parameter, Dy::Dynamics)
         println(Thread_workload)
     end
     record_Ground(Dy)
+    record_GuideWave(P, Dy)
     println("Caiculation is over!")
 
 end

@@ -3,8 +3,8 @@ module visual
 export plot_probability, plot_Ground
 
 using ..TDQMC
-using PyPlot
 
+using PyPlot, CSV, DataFrames
 
 function plot_probability(P::Parameter)
     local df = CSV.read("Time_evolution_wave_function.csv", DataFrame)

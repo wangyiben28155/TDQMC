@@ -1,6 +1,7 @@
 module TDQMC
 
-export Dynamics, Parameter, parallel_Evolution!, parallel_CTE!, plot_Ground, Group_Energy, dipole_HHG, choose
+export Dynamics, Parameter, extend_num, stitch!, parallel_Evolution!, parallel_CTE!, plot_Ground, 
+        Group_Energy, dipole_HHG, choose
 
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
 import Base.@kwdef
@@ -49,6 +50,7 @@ end
 end
 
 include("Numerical_Diff_DiscreteFunc.jl")                        #用来做数值微分的函数, 对离散函数(不知道解析表达式的波函数进行求解)
+include("Stitching.jl")
 include("Find_nearest.jl")
 include("Potential.jl")
 include("Physical_quantity.jl")
@@ -61,6 +63,7 @@ include("Parallel_Calculation.jl")
 include("visualization.jl")
 
 
+using .Stitching
 using .Evolution           #把包中的变量空间导入到主模块当中export出去使用
 using .Trajectory
 using .Quantity
