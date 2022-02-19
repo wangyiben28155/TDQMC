@@ -1,6 +1,6 @@
 module Quantity
 
-export Group_Energy, dipole_HHG
+export Group_Energy, dipole_HHG, acc_HHG
 
 using ..TDQMC
 using ..TDQMC.Discrete_Func_diff
@@ -93,12 +93,12 @@ function acc_HHG(P::Parameter, Dy::Dynamics)
     local Type_0 = eltype(Dy.Displace)
     local floor_a = floor(Int, a / 2)
     local fₛ = a / (P.step_t * real(P.Δt))                           #也就是N/t_sum
-    local Discrete_a = zeros(Complex{Type_0}, a, b, c)
+    local Discrete_a = zeros(eltype(Dy.Displace), a, b, c)
     local Discrete_ft = zeros(Complex{Type_0}, floor_a + 1, b, c)        #预置元素为复数的数组
     local Total_ft = zeros(Complex{Type_0}, floor_a + 1, c)
 
     for j in 1:c, i in 1:b
-        Discrete_a[:, i, j] = Derivative_2(Dy.Displace[:, i, j], dL = P.Δx)
+        Discrete_a[:, i, j] = Derivative_2(Dy.Displace[:, i, j], dL = P.Δt)
     end
 
     Discrete_ft[:, :, :] = rfft(Discrete_a, 1)

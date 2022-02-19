@@ -36,7 +36,7 @@ function Interpolation_Wave(Particle_num::Integer, serial_num::Integer, P::Param
     local interp_cubic::Interpolations.Extrapolation
 
     for i = 1:P.electron
-        interp_cubic = CubicSplineInterpolation(xd, yd[i])        #得到三次样条插值函数, i 代表每个电子的波函数的五点取样值
+        interp_cubic = CubicSplineInterpolation(xd, yd[i])        #得到三次样条插值函数, i 代表每个电子的波函数的五点取样值 
         Vec_Wave[i] = interp_cubic(localtion)                     #然后
         Vec_Derivate[i] = Interpolations.gradient(interp_cubic, localtion)[1]
     end
@@ -78,16 +78,20 @@ end
 
 function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer; dt = P.Δt)                     # 这里我们使用欧拉法即可
     local Vec_Trajectory = view(Dy.Trajectory, :, serial_num)
+    local Inbound_index::Vector{<:Integer} = findall(x -> abs(x) < P.scope, Vec_Trajectory)
+    local Inbound_num = length(Inbound_index)
     local OutBoundary_index::Vector{<:Integer} = Int64[]
     local Total_time = P.step_t * real(dt)
 
-    Vec_Trajectory[:] .+= real(dt) * Velocity(P, Dy, serial_num)
+
+    Vec_Trajectory[Inbound_index] .+= real(dt) * Velocity(P, Dy, serial_num)[Inbound_index]
 
     if imag(dt) != 0.0                          #这一部分是为了在寻找基态的过程中避免quantum dift,使用线性衰减的随机数
-        Vec_Trajectory[:] .+= 0.1  * (rand(P.electron) .- 0.5) * thermalization(Dy.Time[serial_num], cut_off = Total_time)
+        Vec_Trajectory[Inbound_index] .+= 0.1 * thermalization(Dy.Time[serial_num], cut_off = Total_time) * (rand(Inbound_num).-0.5)
     end
 
-    OutBoundary_index = findall(x -> abs(x) > P.scope, Vec_Trajectory)       #下面的部分是为了将超过边界的粒子停留在边界
+    OutBoundary_index = findall(x -> abs(x) > P.scope, Vec_Trajectory)       #上面已经对粒子的位置进行了更新,
+                                                                             #下面的部分是为了将超过边界的粒子停留在边界
 
     if isempty(OutBoundary_index)
         return nothing
