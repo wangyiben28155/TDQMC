@@ -5,13 +5,13 @@ export V_ne, V_ee, Vtd_Operator
 using ..TDQMC
 using SparseArrays, LinearAlgebra
 
-const ω_0 = 0.148
+const ω_0 = 0.05
 
 # 导波函数部分
 V_ne(x::T; α::T = 1.0) where {T<:AbstractFloat} = -1.0 / sqrt(α + x^2)                         #定义势能项, 因为这里不需要对矩阵进行运算, 就不需要用
 V_ee(x_t::T; x::AbstractVector{T}, β::T = 0.2) where {T<:AbstractFloat} = @. 1.0 / sqrt(β + (x - x_t)^2)
 
-Envelope(t::T; T_0::T = 2pi / ω_0, ξ_0::T = 0.1) where {T<:AbstractFloat} = t <= 3 * T_0 ? ξ_0 * sin(pi * t / (6 * T_0))^2 : ξ_0
+Envelope(t::T; ξ_0::T = 0.1, ω::T = ω_0) where {T<:AbstractFloat} = ξ_0 * sin(ω * t /4)^2 
 Electric_Field(t::T; ϵ::Function = Envelope, ω::T = ω_0) where {T<:AbstractFloat} = ϵ(t) * sin(ω * t)   #定义电场
 
 function Vee_Operator(x_t::Vector{T}, P::Parameter) where {T<:AbstractFloat}             #此函数返回的是Vector类型, 对应空间上势能的分布, x_t为不同系综粒子的轨迹,这里可以结合不同的组进行并行

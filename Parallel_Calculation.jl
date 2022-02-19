@@ -30,7 +30,7 @@ end
 
 function record_Displace(P::Parameter, Dy::Dynamics)
     local a, b, c = size(Dy.Displace)
-    local A = reshape(Dy, (a, b * c))
+    local A = reshape(Dy.Displace, (a, b * c))
     local df = DataFrame(A, :auto)
 
     df.t_range = P.Δt * (0:P.step_t)
