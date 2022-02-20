@@ -52,7 +52,7 @@ function parallel_Evolution!(P::Parameter, Dy::Dynamics)
     local Threads_num::Integer = nthreads()
     local Thread_workload::Vector{<:Integer} = zeros(typeof(Threads_num), Threads_num)         #注意这里有数据竞争, 等下需要修改使用锁或者原子操作
 
-    local later_fix::SparseMatrixCSC, former_fix::SparseMatrixC = Fix_Matrix(P)
+    local later_fix::SparseMatrixCSC, former_fix::SparseMatrixCSC = Fix_Matrix(P)
 
     #这里对固定的构造参数使用传参, 而不在函数原来本身内部定义, 避免储存空间的浪费, 这些改动是在所有函数写好之后进行的更改
     @threads for i = 1:P.Group
@@ -69,7 +69,7 @@ function parallel_CTE!(P::Parameter, Dy::Dynamics)
     local Threads_num::Integer = nthreads()
     local Thread_workload::Vector{<:Integer} = zeros(typeof(Threads_num), Threads_num)
 
-    local later_fix::SparseMatrixCSC, former_fix::SparseMatrixC = Fix_Matrix(P)
+    local later_fix::SparseMatrixCSC, former_fix::SparseMatrixCSC = Fix_Matrix(P)
 
     @threads for i = 1:P.Group
         CT_Evolution!(P, Dy, i, later_fix = later_fix, former_fix = former_fix)
