@@ -30,7 +30,7 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int;
             Reset_matrix!(P, Dy, serial_num, Change_matrix_former, Change_matrix_later)
             Construct_matrix!(P, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
         
-            Vec_wave[:] = Change_matrix_former .* Vec_wave
+            Vec_wave[:] = Change_matrix_former .* Vec_wave                #为了减少计算量,也只对边界内的粒子对应的导波函数进行迭代
             Vec_wave[:] = Change_matrix_later .\ Vec_wave
         
         

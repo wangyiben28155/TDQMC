@@ -29,7 +29,7 @@ end
 
 function Interpolation_Wave(Particle_num::Integer, serial_num::Integer, P::Parameter, Dy::Dynamics)
     local localtion = Dy.Trajectory[Particle_num, serial_num]                                           #这里选出的是一个轨迹
-    local xd::LinRange, yd::Vector = find_lattice_wave(Particle_num, serial_num, P, Dy)
+    local xd::LinRange, yd::Vector = find_lattice_wave(Particle_num, serial_num, P, Dy) 
     local Type_1 = eltype(eltype(yd))
     local Vec_Wave::Vector{<:Complex} = zeros(Type_1, P.electron)
     local Vec_Derivate::Vector{<:Complex} = zeros(Type_1, P.electron)
@@ -37,11 +37,10 @@ function Interpolation_Wave(Particle_num::Integer, serial_num::Integer, P::Param
 
     for i = 1:P.electron
         interp_cubic = CubicSplineInterpolation(xd, yd[i])        #得到三次样条插值函数, i 代表每个电子的波函数的五点取样值 
-        if  abs(location[i]) != Inf
-            Vec_Wave[i] = interp_cubic(localtion)                   #然后
-            Vec_Derivate[i] = Interpolations.gradient(interp_cubic, localtion)[1]
-        end
+        Vec_Wave[i] = interp_cubic(localtion)                   #然后
+        Vec_Derivate[i] = Interpolations.gradient(interp_cubic, localtion)[1]
     end
+
     return Vec_Wave, Vec_Derivate    #返回在particle_num的电子的轨迹处, 对所有电子的波函数和导数的取值
 end
 
@@ -52,9 +51,9 @@ function Slater_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)   #
     local symmetric_determinate::Matrix{<:Complex} = zeros(Type_2, (P.electron, P.electron))
     local Derivate_eachcoodinate::Matrix{<:Complex} = zeros(Type_2, (P.electron, P.electron))
 
-    for i = 1:P.electron
-        Vec_Wave, Vec_Derivate = Interpolation_Wave(i, serial_num, P, Dy)
-        symmetric_determinate[:, i] = Vec_Wave
+    for i = 1:P.electron                                                              #这里的for 循环只对边界内电子的索引进行,上面的循环都要这样
+        Vec_Wave, Vec_Derivate = Interpolation_Wave(i, serial_num, P, Dy)             #这里应该改为在边界内对应的电子的行列式进行计算
+        symmetric_determinate[:, i] = Vec_Wave                                        #在Dy中加入一个Inbound来记录在边界内的索引
         Derivate_eachcoodinate[:, i] = Vec_Derivate
     end
 
@@ -98,7 +97,7 @@ function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer; dt = P.Δt) 
     if isempty(OutBoundary_index)
         return nothing
     else
-        Vec_Trajectory[OutBoundary_index] = sign.(Vec_Trajectory[OutBoundary_index]) * Inf
+        Vec_Trajectory[OutBoundary_index] = sign.(Vec_Trajectory[OutBoundary_index]) * P.scope           #要改成Inf,等上面完工再说
     end
 end
 
