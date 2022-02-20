@@ -1,6 +1,6 @@
 module TDQMC
 
-export Dynamics, Parameter, extend_num, stitch_Matrix, parallel_Evolution!, parallel_CTE!, plot_Ground, 
+export Dynamics, Parameter, extend_num, stitch_Matrix, parallel_Evolution!, parallel_CTE!, 
         Group_Energy, dipole_HHG, acc_HHG, choose
 
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
@@ -61,7 +61,6 @@ include("Trajectory.jl")
 include("Evolution.jl")
 include("Evolution_complex.jl")
 include("Parallel_Calculation.jl")
-include("visualization.jl")
 
 
 using .Stitching
@@ -70,7 +69,6 @@ using .Trajectory
 using .Quantity
 using .Rejection
 using .Parallelize
-using .visual
 
 
 
