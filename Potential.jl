@@ -5,21 +5,21 @@ export V_ne, V_ee, Vtd_Operator
 using ..TDQMC
 using SparseArrays, LinearAlgebra
 
-const ω_0 = 0.148
+const ω_0 = 0.05
 
 # 导波函数部分
 V_ne(x::T; α::T = 1.0) where {T<:AbstractFloat} = -1.0 / sqrt(α + x^2)                         #定义势能项, 因为这里不需要对矩阵进行运算, 就不需要用
-Envelope(t::T; ξ_0::T = 0.1, ω::T = ω_0, T₀::T = 2 * pi / ω) where {T<:AbstractFloat} = t < 3 * T₀ ? ξ_0 * sin(ω * t / 12)^2 : ξ_0
+Envelope(t::T; ξ_0::T = 0.1, ω::T = ω_0) where {T<:AbstractFloat} = ξ_0 * sin(ω * t / 4)^2
 Electric_Field(t::T; ϵ::Function = Envelope, ω::T = ω_0) where {T<:AbstractFloat} = ϵ(t) * sin(ω * t)   #定义电场
 
 function V_ee(x_t::T; x::AbstractVector{T}, β::T = 0.2) where {T<:AbstractFloat}
-    if x[1] < x_t < x[end] 
+    if x[1] < x_t < x[end]
         @. 1.0 / sqrt(β + (x - x_t)^2)
-    else                                                                         
+    else
         zeros(typeof(x_t), length(x))
     end
 end
-                                                                                            
+
 
 function Vee_Operator(x_t::Vector{T}, P::Parameter) where {T<:AbstractFloat}             #此函数返回的是Vector类型, 对应空间上势能的分布, x_t为不同系综粒子的轨迹,这里可以结合不同的组进行并行
     local Matrix_Vee::Matrix{T} = zeros(T, (P.space_N, P.electron))                      #这个矩阵是用来存放势能函数的空间分布的
