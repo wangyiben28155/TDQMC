@@ -1,7 +1,7 @@
 module TDQMC
 
 export Dynamics, Parameter, extend_num, stitch_Matrix, parallel_Evolution!, parallel_CTE!, 
-        Group_Energy, dipole_HHG, acc_HHG, choose
+        Group_Energy, HHG, choose
 
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
 import Base.@kwdef
