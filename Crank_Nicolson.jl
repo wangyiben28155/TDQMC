@@ -18,6 +18,14 @@ function ChangePart_Matrix!(pre_alloc::Vector{<:SparseMatrixCSC}, P::Parameter, 
 end
 
 
+function Reset_matrix!(P::Parameter, Dy::Dynamics, serial_num::Int,                 #这个函数主要用来赋值
+    Change_matrix_former::Vector{T}, Change_matrix_later::Vector{T}) where {T<:SparseMatrixCSC}
+
+    ChangePart_Matrix!(Change_matrix_former, P, Dy, serial_num)                     #将former个变量里的稀疏矩阵重置为每一时刻的差分稀疏矩阵
+    Change_matrix_later[:] = -deepcopy(Change_matrix_former)
+end
+
+
 function Construct_matrix!(P::Parameter, later_fix::T, former_fix::T,
     Change_matrix_former::Vector{T}, Change_matrix_later::Vector{T}) where {T<:SparseMatrixCSC}
 
@@ -27,15 +35,5 @@ function Construct_matrix!(P::Parameter, later_fix::T, former_fix::T,
     end
 
 end
-
-
-function Reset_matrix!(P::Parameter, Dy::Dynamics, serial_num::Int,                 #这个函数主要用来赋值
-    Change_matrix_former::Vector{T}, Change_matrix_later::Vector{T}) where {T<:SparseMatrixCSC}
-
-    ChangePart_Matrix!(Change_matrix_former, P, Dy, serial_num)                     #将former个变量里的稀疏矩阵重置为每一时刻的差分稀疏矩阵
-    Change_matrix_later[:] = -deepcopy(Change_matrix_former)
-end
-
-
 
 end
