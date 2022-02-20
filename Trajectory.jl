@@ -37,14 +37,16 @@ function Interpolation_Wave(Particle_num::Integer, serial_num::Integer, P::Param
 
     for i = 1:P.electron
         interp_cubic = CubicSplineInterpolation(xd, yd[i])        #得到三次样条插值函数, i 代表每个电子的波函数的五点取样值 
-        Vec_Wave[i] = interp_cubic(localtion)                     #然后
-        Vec_Derivate[i] = Interpolations.gradient(interp_cubic, localtion)[1]
+        if  abs(location[i]) != Inf
+            Vec_Wave[i] = interp_cubic(localtion)                   #然后
+            Vec_Derivate[i] = Interpolations.gradient(interp_cubic, localtion)[1]
+        end
     end
     return Vec_Wave, Vec_Derivate    #返回在particle_num的电子的轨迹处, 对所有电子的波函数和导数的取值
 end
 
 
-function Slater_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)           #通过此函数得到交叉关联的波函数, 按理来说有多少个电子就应该有多少个坐标,对应Electron_num维度的电子波函数
+function Slater_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)   #通过此函数得到交叉关联的波函数, 按理来说有多少个电子就应该有多少个坐标,对应Electron_num维度的电子波函数, 从这一步开始进行对电子
     local Type_2 = eltype(eltype(Dy.Guide_Wave))
     local Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex} = (zeros(Type_2, P.electron), zeros(Type_2, P.electron))
     local symmetric_determinate::Matrix{<:Complex} = zeros(Type_2, (P.electron, P.electron))
@@ -96,7 +98,7 @@ function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer; dt = P.Δt) 
     if isempty(OutBoundary_index)
         return nothing
     else
-        Vec_Trajectory[OutBoundary_index] = sign.(Vec_Trajectory[OutBoundary_index]) * P.scope
+        Vec_Trajectory[OutBoundary_index] = sign.(Vec_Trajectory[OutBoundary_index]) * Inf
     end
 end
 
