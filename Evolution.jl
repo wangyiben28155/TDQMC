@@ -34,6 +34,10 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int;
         for i = 1:P.step_t
             find_inbound!(P, Dy, serial_num, Vec_Trajectory)
         
+            if Dy.In_num[serial_num] == 0
+                break
+            end
+            
             Reset_matrix!(P, Dy, serial_num, Change_matrix_former, Change_matrix_later)
             Construct_matrix!(Dy, serial_num, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
         
