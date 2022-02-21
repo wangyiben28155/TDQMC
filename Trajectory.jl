@@ -11,10 +11,19 @@ using Interpolations, LinearAlgebra                                             
     return real(t) <= cut_off ?  amp * (1.0 - real(t) / cut_off) : 0.0
 end
 
+@inline function Spin_Effect(P::Parameter, Dy::Dynamics, serial_num::Integer)
+    local Select_Spin::Vector = P.Spin[Dy.Index[serial_num]]
+    local Spin_Effect::Matrix{<:Integer} = Select_Spin * Select_Spin'
+
+    replace!(tril!(Spin_Effect), 0 => 1)
+
+    return Spin_Effect
+end
+
 
 function find_lattice_wave!(localtion::AbstractFloat, serial_num::Integer,
     k_itp_Wave_Vector::Vector{<:Vector{<:Complex}}, P::Parameter, Dy::Dynamics;
-    k::Integer, In_num::Int64)
+    k::Integer, In_num::Integer)
     #得到某一个粒子的位置坐标
     local Index = Dy.Index[serial_num]
 
@@ -31,7 +40,7 @@ end
 
 function Interpolation_Wave!(Particle_num::Integer, serial_num::Integer,
     Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex}, P::Parameter, Dy::Dynamics;
-    k::Integer = 5, Type::DataType, In_num::Int64)
+    k::Integer = 5, Type::DataType, In_num::Integer)
 
     local localtion::AbstractFloat = Dy.Trajectory[Particle_num, serial_num]                                                                   #小变量没必要传参,但读取需要时间,为方便下面使用,就使用变量读取保存
     local yd::Vector{<:Vector{<:Complex}} = [zeros(Type, k) for i = 1:In_num]
@@ -50,35 +59,38 @@ end
 
 
 function Slater_determinant!(Symmetric::Matrix{<:Complex}, Derivate::Matrix{<:Complex},
-    P::Parameter, Dy::Dynamics, serial_num::Integer; Type::DataType, In_num::Int64)   #通过此函数得到交叉关联的波函数, 按理来说有多少个电子就应该有多少个坐标
+    P::Parameter, Dy::Dynamics, serial_num::Integer; Type::DataType, In_num::Integer)   #通过此函数得到交叉关联的波函数, 按理来说有多少个电子就应该有多少个坐标
     local Index = Dy.Index[serial_num]
 
     local Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex} = (zeros(Type, In_num), zeros(Type, In_num))
+    local Spin_Matrix::Matrix{<:Integer} = Spin_Effect(P, Dy, serial_num)
 
     for i in 1:In_num                                                             #这里的for 循环只对边界内电子的索引进行,上面的循环都要这样
         Interpolation_Wave!(Index[i], serial_num, Vec_Wave, Vec_Derivate, P, Dy, Type = Type, In_num = In_num)             #这里应该改为在边界内对应的电子的行列式进行计算
-    
+
         Symmetric[:, i] = Vec_Wave                                        #在Dy中加入一个Inbound来记录在边界内的索引
         Derivate[:, i] = Vec_Derivate
     end
+
+    Symmetric .*= Spin_Matrix
+    Derivate .*= Spin_Matrix
 
 end
 
 
 function Velocity(P::Parameter, Dy::Dynamics, serial_num::Integer;
-    Type::DataType = eltype(eltype(Dy.Guide_Wave)), In_num::Int)
+    Type::DataType = eltype(eltype(Dy.Guide_Wave)), In_num::Integer)
 
     local symmetric_determinate, Derivate_eachcoodinate = (zeros(Type, (In_num, In_num)), zeros(Type, (In_num, In_num)))
-    local Derivate_WaveFunc::Vector{<:Matrix{<:Complex}} = [deepcopy(symmetric_determinate) for i = 1:In_num]
-    local symmetric_WaveFunc::Vector{<:Matrix{<:Complex}} = fill(symmetric_determinate, In_num)
+    local Derivate_WaveFunc::Vector{<:Matrix{<:Complex}}
+    local symmetric_WaveFunc::Vector{<:Matrix{<:Complex}}
 
     local Vector_velocity::Vector{<:AbstractFloat} = zeros(eltype(Dy.Trajectory), In_num)
 
-
     Slater_determinant!(symmetric_determinate, Derivate_eachcoodinate, P, Dy, serial_num, Type = Type, In_num = In_num)
 
-    Derivate_WaveFunc .= [deepcopy(symmetric_determinate) for i = 1:In_num]
-    symmetric_WaveFunc .= fill(symmetric_determinate, In_num)
+    Derivate_WaveFunc = [deepcopy(symmetric_determinate) for i = 1:In_num]
+    symmetric_WaveFunc = fill(symmetric_determinate, In_num)
 
     for i in 1:In_num
         Derivate_WaveFunc[i][:, i] = Derivate_eachcoodinate[:, i]
@@ -91,7 +103,7 @@ end
 
 
 function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer, Vec_Trajectory::SubArray;
-    dt = P.Δt, In_num::Int64 = Dy.In_num[serial_num])                     # 这里我们使用欧拉法即可
+    dt = P.Δt, In_num::Integer = Dy.In_num[serial_num])                     # 这里我们使用欧拉法即可
 
     local Index = Dy.Index[serial_num]
     local OutBoundary_index::Vector{<:Integer} = Int64[]

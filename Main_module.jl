@@ -8,8 +8,8 @@ import Base.@kwdef
 
 const Ensemble_num, Electron_num = (250, 1)                                 #设定一些计算的参数
 const L, x_num, step_t, Δt = (30.0, 3001, 300, 0.05 - 0.05im)
-const μ, σ = (LinRange(-(Electron_num - 1) / 2, (Electron_num - 1) / 2, Electron_num), 10)       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
-const spin = [1, -1]
+const μ, σ = (LinRange(-(Electron_num - 1) / 2, (Electron_num - 1) / 2, Electron_num), 1.5)       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
+const spin = [1]
 
 
 function initializer_guideWave(n::T) where {T<:Integer}                                           #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
@@ -33,8 +33,8 @@ end
     Energy::Vector{T} = zeros(T, Ensemble_num)
     Time::Vector{Union{T,Complex{T}}} = zeros(typeof(Δt), Ensemble_num)
     Displace::Array{T,3} = zeros(T, (step_t+1, Ensemble_num, Electron_num))
-    Index::Vector{Vector{<:Integer}} = [Int64[] for i in 1:Ensemble_num]                #在-P.scope到P.scope之内电子轨迹的索引
-    In_num::Vector{<:Integer} = zeros(Int64, Ensemble_num)                              #边界内电子的数目
+    Index::Vector{Vector{<:Integer}} = [Int64[0] for i in 1:Ensemble_num]                #在-P.scope到P.scope之内电子轨迹的索引
+    In_num::Vector{<:Integer} = ones(Int64, Ensemble_num)                              #边界内电子的数目
 end
 
 

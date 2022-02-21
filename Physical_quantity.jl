@@ -23,8 +23,7 @@ end
 
 
 
-function kinetic_part(P::Parameter, Dy::Dynamics, serial_num::Integer)
-    local k = 5                                                                             #这里指定的插值点的个数
+function kinetic_part(P::Parameter, Dy::Dynamics, serial_num::Integer; k::Integer = 5)                                                         
     local Type = eltype(eltype(Dy.Guide_Wave))
     local location_vec::Vector = Dy.Trajectory[:, serial_num]
     local indexVec_k::Vector{<:UnitRange{<:Integer}} = find_k_index.(location_vec, x = P.sampling, k = k)
