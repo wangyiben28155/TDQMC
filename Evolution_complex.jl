@@ -17,7 +17,7 @@ end
 
 
 @inline function Normalizer(P::Parameter, Dy::Dynamics, serial_num::Integer)
-    return sqrt.(integrate(P.sampling, abs2.(hcat(Dy.Guide_Wave[Dy.Index[serial_num], serial_num])...), SimpsonEven()))
+    return sqrt.(integrate(P.sampling, abs2.(hcat(Dy.Guide_Wave[Dy.Index[serial_num], serial_num]...)), SimpsonEven()))
 end
 
 
@@ -29,10 +29,8 @@ end
 function CT_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Integer;
     later_fix::SparseMatrixCSC, former_fix::SparseMatrixCSC)
 
-
     local Change_matrix_former::Vector{<:SparseMatrixCSC} = [spzeros(eltype(later_fix), P.space_N, P.space_N) for i = 1:P.electron]
     local Change_matrix_later::Vector{<:SparseMatrixCSC} = -deepcopy(Change_matrix_former)
-
 
     local Vec_wave = view(Dy.Guide_Wave, :, serial_num)
     local Vec_Trajectory = view(Dy.Trajectory, :, serial_num)
