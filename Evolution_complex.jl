@@ -57,14 +57,14 @@ function CT_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Integer;
         
             Normalization!(P, Dy, serial_num, Vec_wave)                                  #因为要重复使用,这里应该需要储存到一个变量里比较好.
         
-            Movement!(P, Dy, serial_num, dt = P.Δt)
+            Movement!(P, Dy, serial_num, Vec_Trajectory, dt = P.Δt)
         
+            
             Dy.Time[serial_num] += P.Δt
             Dy.Displace[i+1, serial_num, :] = Vec_Trajectory           #注意存储数据的时候不要数据竞争
         
         end
 
-        #record(P, Wave)                         #这里结束后说明迭代得到了稳定的波函数
     else
         return @error "the Time shold be a Complex number"
     end

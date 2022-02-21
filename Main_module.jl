@@ -8,7 +8,7 @@ import Base.@kwdef
 
 const Ensemble_num, Electron_num = (250, 1)                                 #设定一些计算的参数
 const L, x_num, step_t, Δt = (30.0, 3001, 300, 0.05 - 0.05im)
-const μ, σ = (LinRange(-(Electron_num - 1) / 2, (Electron_num - 1) / 2, Electron_num), 1.5)       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
+const μ, σ = (LinRange(-(Electron_num - 1) / 2, (Electron_num - 1) / 2, Electron_num), 10)       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
 const spin = [1, -1]
 
 
