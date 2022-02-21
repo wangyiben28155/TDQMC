@@ -12,15 +12,15 @@ using Interpolations, LinearAlgebra   #然后对不在格点上的轨迹进行�
 end
 
 
-function find_lattice_wave(Particle_num::Integer, serial_num::Integer, P::Parameter, Dy::Dynamics; k::Integer = 5)    #这个对应的是粒子的轨迹矢量,用来得到相应的波函数插值的部分
-    local localtion = Dy.Trajectory[Particle_num, serial_num]                          #得到某一个粒子的位置坐标
+function find_lattice_wave(Particle_num::Integer, serial_num::Integer, P::Parameter, Dy::Dynamics; k::Integer = 5)    #这个对应的是粒子的轨迹矢量,用来得到相应的波函数插值的部分, 读取波函数或者轨迹的信息时候需要Index,其他时候只需要In_num
+    local localtion = Dy.Trajectory[Particle_num, serial_num]
+    local Type_0 = eltype(eltype(Dy.Guide_Wave))                                                       #得到某一个粒子的位置坐标
     local In_num = Dy.In_num[serial_num]
     local Index = Dy.Index[serial_num]
-    local indexVec_k::UnitRange{<:Integer} = find_k_index(localtion, x = P.sampling, k = k)
-    local Type_0 = eltype(eltype(Dy.Guide_Wave))
 
-    local k_itp_Wave_Vector::Vector{<:Vector{<:Complex{<:AbstractFloat}}} = [zeros(Type_0, k) for i = 1:In_num]     #选取五个点用来插值的波函数矢量,注意这种
-    #赋值的方式每一个重复的部分在后面赋值的时#候不会产生关联.
+    local indexVec_k::UnitRange{<:Integer} = find_k_index(localtion, x = P.sampling, k = k)
+
+    local k_itp_Wave_Vector::Vector{<:Vector{<:Complex{<:AbstractFloat}}} = [zeros(Type_0, k) for i = 1:In_num]     #选取五个点用来插值的波函数矢量
 
     for i in 1:In_num
         k_itp_Wave_Vector[i] = Dy.Guide_Wave[Index[i], serial_num][indexVec_k]
@@ -31,10 +31,13 @@ end
 
 
 function Interpolation_Wave(Particle_num::Integer, serial_num::Integer, P::Parameter, Dy::Dynamics)
-    local localtion = Dy.Trajectory[Particle_num, serial_num]                         #这里选出的是一个轨迹
-    local xd::LinRange, yd::Vector = find_lattice_wave(Particle_num, serial_num, P, Dy)
-    local Type_1 = eltype(eltype(yd))
+    
+    local localtion = Dy.Trajectory[Particle_num, serial_num]  #小变量没必要传参,但读取需要时间,为方便下面使用,就使用变量读取保存
+    local Type_1 = eltype(eltype(Dy.Guide_Wave))
     local In_num = Dy.In_num[serial_num]
+
+    local xd::LinRange, yd::Vector = find_lattice_wave(Particle_num, serial_num, P, Dy)
+
     local Vec_Wave::Vector{<:Complex} = zeros(Type_1, In_num)
     local Vec_Derivate::Vector{<:Complex} = zeros(Type_1, In_num)
     local interp_cubic::Interpolations.Extrapolation
@@ -53,6 +56,7 @@ function Slater_determinant(P::Parameter, Dy::Dynamics, serial_num::Integer)   #
     local Type_2 = eltype(eltype(Dy.Guide_Wave))
     local In_num = Dy.In_num[serial_num]
     local Index = Dy.Index[serial_num]
+
     local Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex} = (zeros(Type_2, In_num), zeros(Type_2, In_num))
     local symmetric_determinate::Matrix{<:Complex} = zeros(Type_2, (In_num, In_num))
     local Derivate_eachcoodinate::Matrix{<:Complex} = zeros(Type_2, (In_num, In_num))
@@ -69,9 +73,12 @@ end
 
 function Velocity(P::Parameter, Dy::Dynamics, serial_num::Integer)
     local In_num = Dy.In_num[serial_num]
+
     local symmetric_determinate, Derivate_eachcoodinate = Slater_determinant(P, Dy, serial_num)
+
     local Derivate_WaveFunc::Vector{<:Matrix{<:Complex}} = [deepcopy(symmetric_determinate) for i = 1:In_num]
     local symmetric_WaveFunc::Vector{<:Matrix{<:Complex}} = fill(symmetric_determinate, In_num)
+
     local Vector_velocity::Vector{<:AbstractFloat} = zeros(eltype(Dy.Trajectory), In_num)
 
     for i in 1:In_num
@@ -86,9 +93,11 @@ end
 
 function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer; dt = P.Δt)                     # 这里我们使用欧拉法即可
     local Vec_Trajectory = view(Dy.Trajectory, :, serial_num)
+
     local In_num = Dy.In_num[serial_num]
     local Index = Dy.Index[serial_num]
     local OutBoundary_index::Vector{<:Integer} = Int64[]
+    
     local Total_time = P.step_t * real(dt)
 
 
