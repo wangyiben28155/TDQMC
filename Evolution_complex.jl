@@ -10,9 +10,19 @@ using ..TDQMC.Quantity
 
 using SparseArrays, NumericalIntegration
 
+function find_inbound!(P::Parameter, Dy::Dynamics, serial_num::Integer, Vec_Trajectory::SubArray)
+    Dy.Index[serial_num] = findall(x -> abs(x) < P.scope, Vec_Trajectory)
+    Dy.In_num[serial_num] = length(Dy.Index[serial_num])
+end
 
-@inline function Normalization(P::Parameter, Dy::Dynamics, serial_num::Integer)
-    return sqrt.(integrate(P.sampling, abs2.(hcat(Dy.Guide_Wave[:, serial_num])...), SimpsonEven()))
+
+@inline function Normalizer(P::Parameter, Dy::Dynamics, serial_num::Integer)
+    return sqrt.(integrate(P.sampling, abs2.(hcat(Dy.Guide_Wave[Dy.Index[serial_num], serial_num])...), SimpsonEven()))
+end
+
+
+@inline function Normalization!(P::Parameter, Dy::Dynamics, serial_num::Integer, Vec_wave::SubArray{<:Vector})
+    Vec_wave ./= Normalizer(P, Dy, serial_num)
 end
 
 
@@ -27,8 +37,6 @@ function CT_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Integer;
     local Vec_wave = view(Dy.Guide_Wave, :, serial_num)
     local Vec_Trajectory = view(Dy.Trajectory, :, serial_num)
 
-    local Normalizer::Vector{<:AbstractFloat} = zeros(eltype(Dy.Trajectory), P.electron)
-
 
     Dy.Displace[1, serial_num, :] = Vec_Trajectory
 
@@ -36,15 +44,14 @@ function CT_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Integer;
     if imag(P.Δt) != 0.0                        #这里确保是复时演化
 
         for i in 1:P.step_t
+            find_inbound!(P, Dy, serial_num, Vec_Trajectory)
         
             Reset_matrix!(P, Dy, serial_num, Change_matrix_former, Change_matrix_later)
-            Construct_matrix!(P, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
+            Construct_matrix!(Dy, serial_num, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
         
-            Vec_wave[:] = Change_matrix_former .* Vec_wave
-            Vec_wave[:] = Change_matrix_later .\ Vec_wave
+            Evolution!(Dy, serial_num, Vec_wave, Change_matrix_former, Change_matrix_later)
         
-            Normalizer .= Normalization(P, Dy, serial_num)                                  #因为要重复使用,这里应该需要储存到一个变量里比较好.
-            Vec_wave ./= Normalizer
+            Normalization!(P, Dy, serial_num, Vec_wave)                                  #因为要重复使用,这里应该需要储存到一个变量里比较好.
         
             Movement!(P, Dy, serial_num, dt = P.Δt)
         

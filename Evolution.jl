@@ -10,6 +10,11 @@ using ..TDQMC.Quantity
 
 using SparseArrays
 
+function find_inbound!(P::Parameter, Dy::Dynamics, serial_num::Integer, Vec_Trajectory::SubArray)
+    Dy.Index[serial_num] = findall(x -> abs(x) < P.scope, Vec_Trajectory)
+    Dy.In_num[serial_num] = length(Dy.Index[serial_num])
+end
+
 
 function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int;
     later_fix::SparseMatrixCSC, former_fix::SparseMatrixCSC)         #计算的是某一个时刻的一组系综粒子的演化矩阵, 相当于对应每一个系综粒子的波函数, 这里使用的数据结构为对应每一个系综粒子, 每一个系综粒子有空间划分格点这么多的n×n的稀疏矩阵, 内部元素的非零元素的个数大概为3n
@@ -21,25 +26,27 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int;
     local Vec_wave = view(Dy.Guide_Wave, :, serial_num)
     local Vec_Trajectory = view(Dy.Trajectory, :, serial_num)
 
+    
     Dy.Displace[1, serial_num, :] = Vec_Trajectory
 
     if imag(P.Δt) == 0.0
-
+    
         for i = 1:P.step_t
+            find_inbound!(P, Dy, serial_num, Vec_Trajectory)
         
             Reset_matrix!(P, Dy, serial_num, Change_matrix_former, Change_matrix_later)
-            Construct_matrix!(P, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
+            Construct_matrix!(Dy, serial_num, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
         
-            Vec_wave[:] = Change_matrix_former .* Vec_wave                #为了减少计算量,也只对边界内的粒子对应的导波函数进行迭代
-            Vec_wave[:] = Change_matrix_later .\ Vec_wave
-        
+            Evolution!(Dy, serial_num, Vec_wave, Change_matrix_former, Change_matrix_later)
         
             Movement!(P, Dy, serial_num, dt = P.Δt)
         
             Dy.Time[serial_num] += P.Δt
             Dy.Displace[i+1, serial_num, :] = Dy.Trajectory[:, serial_num]
         end
+    
 
+    
     else
         return @error "the Time shold be a real number"
     end

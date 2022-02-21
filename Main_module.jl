@@ -33,7 +33,8 @@ end
     Energy::Vector{T} = zeros(T, Ensemble_num)
     Time::Vector{Union{T,Complex{T}}} = zeros(typeof(Δt), Ensemble_num)
     Displace::Array{T,3} = zeros(T, (step_t+1, Ensemble_num, Electron_num))
-    Inbound_index::Vector{Vector{<:Integer}} = [Int64[] for i in 1:Ensemble_num]
+    Index::Vector{Vector{<:Integer}} = [Int64[] for i in 1:Ensemble_num]                #在-P.scope到P.scope之内电子轨迹的索引
+    In_num::Vector{<:Integer} = zeros(Int64, Ensemble_num)                              #边界内电子的数目
 end
 
 
