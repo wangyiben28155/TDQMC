@@ -22,7 +22,6 @@ end
 end
 
 
-
 function kinetic_part(P::Parameter, Dy::Dynamics, serial_num::Integer; k::Integer = 5)                                                         
     local Type = eltype(eltype(Dy.Guide_Wave))
     local location_vec::Vector = Dy.Trajectory[:, serial_num]
@@ -47,7 +46,6 @@ function kinetic_part(P::Parameter, Dy::Dynamics, serial_num::Integer; k::Intege
 
 
     return (-1/2) * real(sum(Vector_Interp_derv ./ Vector_Interp))               #这里要取实数,是因为最后能量计算得到的值为实数,有虚部是因为波函数最后还是带有一定的虚部, 影响最后的计算结果
-
 end
 
 
@@ -77,7 +75,7 @@ function HHG(P::Parameter, Dy::Dynamics)
     local Type_0 = eltype(Dy.Displace)
     local floor_a = floor(Int, a / 2)
     local fₛ = a / (P.step_t * real(P.Δt))
-    local Discrete_acc = zeros(eltype(Dy.Displace), a, b, c)
+    local Discrete_acc = zeros(Type_0, a, b, c)
     local Discrete_ft_dipole = zeros(Complex{Type_0}, floor_a + 1, b, c)
     local Discrete_ft_acc = zeros(Complex{Type_0}, floor_a + 1, b, c)       #预置元素为复数的数组
     local Total_ft_dipole = zeros(Complex{Type_0}, floor_a + 1, c)
