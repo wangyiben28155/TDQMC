@@ -60,7 +60,7 @@ function parallel_Evolution!(P::Parameter, Dy::Dynamics)
         Thread_workload[threadid()] += 1
         println(Thread_workload)
     end
-    #record_Displace(P, Dy)
+    record_Displace(P, Dy)
     println("Caiculation is over!")
 
 end
