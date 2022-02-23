@@ -1,3 +1,5 @@
+module Run_HHG
+
 include("Main_module.jl")
 using .TDQMC
 
@@ -33,3 +35,5 @@ tr = nothing
 GC.gc()
 
 parallel_Evolution!(P, Dy)
+
+end
