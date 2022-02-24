@@ -7,9 +7,9 @@ using SparseArrays, LinearAlgebra
 
 import PhysicalConstants.CODATA2018: a_0, ħ, m_e, c_0
 
-const ω_unit = ħ / (2pi * m_e * a_0^2)
-const λ = 800E-9
-const ω_0 = round(((2pi * c_0 / λ) / ω_unit).val, digits = 3)
+const ω_unit = ħ / (m_e * a_0^2)
+const λ = 800E-9    # 800nm波长
+const ω_0 = round(((2pi * c_0 / λ) / ω_unit).val, digits = 3) #取小数点后3位
 const T_0 = 2pi / ω_0
 const ξ_0 = 0.1
 
