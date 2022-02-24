@@ -43,7 +43,7 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int;
         
             Evolution!(Dy, serial_num, Vec_wave, Change_matrix_former, Change_matrix_later)
         
-            Movement!(P, Dy, serial_num, dt = P.Δt)
+            Movement!(P, Dy, serial_num, Vec_Trajectory, dt = P.Δt)
         
             Dy.Time[serial_num] += P.Δt
             Dy.Displace[i+1, serial_num, :] = Dy.Trajectory[:, serial_num]
