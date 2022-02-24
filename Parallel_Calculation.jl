@@ -61,7 +61,7 @@ function parallel_Evolution!(P::Parameter, Dy::Dynamics)
         println(Thread_workload)
     end
     record_Displace(P, Dy)
-    println("Complex Time Caiculation is over!")
+    println("Real Time Caiculation is over!")
 
 end
 
@@ -79,7 +79,7 @@ function parallel_CTE!(P::Parameter, Dy::Dynamics)
     end
     record_Ground(Dy)
     record_GuideWave(P, Dy)
-    println("Real Time Caiculation is over!")
+    println("Complex Time Caiculation is over!")
 
 end
 
