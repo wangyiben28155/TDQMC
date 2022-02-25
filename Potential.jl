@@ -3,18 +3,21 @@ module Potential_Matrix                                                  #这里
 export V_ne, V_ee, Vtd_Operator
 
 using ..TDQMC
+import ..TDQMC.Electron_num
 using SparseArrays, LinearAlgebra
 
-import PhysicalConstants.CODATA2018: a_0, ħ, m_e, c_0
+#import PhysicalConstants.CODATA2018: a_0, ħ, m_e, c_0
 
-const ω_unit = ħ / (m_e * a_0^2)
-const λ = 800E-9    # 800nm波长
-const ω_0 = round(((2pi * c_0 / λ) / ω_unit).val, digits = 3) #取小数点后3位
+#const ω_unit = ħ / (m_e * a_0^2)
+#const λ = 800E-9    # 800nm波长
+#const ω_0 = round(((2pi * c_0 / λ) / ω_unit).val, digits = 3) #取小数点后3位
+const λ = 800   # 800nm波长
+const ω_0 = round(45.56/λ, digits = 3)
 const T_0 = 2pi / ω_0
 const ξ_0 = 0.1
 
 # 导波函数部分
-V_ne(x::T; α::T = 1.0) where {T<:AbstractFloat} = -1.0 / sqrt(α + x^2)                         #定义势能项, 因为这里不需要对矩阵进行运算, 就不需要用
+V_ne(x::T; α::T = 1.0) where {T<:AbstractFloat} = -float(Electron_num) / sqrt(α + x^2)                         #定义势能项, 因为这里不需要对矩阵进行运算, 就不需要用
 Envelope(t::T; ξ_0::T = ξ_0, ω::T = ω_0) where {T<:AbstractFloat} = ξ_0 * sin(ω * t / 4)^2
 Electric_Field(t::T; ϵ::Function = Envelope, ω::T = ω_0) where {T<:AbstractFloat} = ϵ(t) * sin(ω * t)   #定义电场
 

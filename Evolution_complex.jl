@@ -55,7 +55,7 @@ function CT_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Integer;
         
             Normalization!(P, Dy, serial_num, Vec_wave)                                  #因为要重复使用,这里应该需要储存到一个变量里比较好.
         
-            Movement!(P, Dy, serial_num, Vec_Trajectory, dt = P.Δt)
+            Movement!(P, Dy, serial_num, Vec_Trajectory)
         
             
             Dy.Time[serial_num] += P.Δt

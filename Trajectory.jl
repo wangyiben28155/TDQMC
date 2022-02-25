@@ -23,8 +23,9 @@ end
 
 function find_lattice_wave!(localtion::AbstractFloat, serial_num::Integer,
     k_itp_Wave_Vector::Vector{<:Vector{<:Complex}}, P::Parameter, Dy::Dynamics;
-    k::Integer, In_num::Integer)
+    k::Integer)
     #得到某一个粒子的位置坐标
+    local In_num = Dy.In_num[serial_num]
     local Index = Dy.Index[serial_num]
 
     local indexVec_k::UnitRange{<:Integer} = find_k_index(localtion, x = P.sampling, k = k)
@@ -40,11 +41,13 @@ end
 
 function Interpolation_Wave!(Particle_num::Integer, serial_num::Integer,
     Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex}, P::Parameter, Dy::Dynamics;
-    k::Integer = 5, Type::DataType, In_num::Integer)
+    k::Integer = 5)
+    local Type = eltype(Vec_Derivate)
+    local In_num = Dy.In_num[serial_num]
 
     local localtion::AbstractFloat = Dy.Trajectory[Particle_num, serial_num]                                                                   #小变量没必要传参,但读取需要时间,为方便下面使用,就使用变量读取保存
     local yd::Vector{<:Vector{<:Complex}} = [zeros(Type, k) for i = 1:In_num]
-    local xd::LinRange = find_lattice_wave!(localtion, serial_num, yd, P, Dy, k = k, In_num = In_num)
+    local xd::LinRange = find_lattice_wave!(localtion, serial_num, yd, P, Dy, k = k)
 
     local interp_cubic::Vector{<:Interpolations.Extrapolation} = Vector{Interpolations.Extrapolation}(undef, In_num)
 
@@ -59,14 +62,16 @@ end
 
 
 function Slater_determinant!(Symmetric::Matrix{<:Complex}, Derivate::Matrix{<:Complex},
-    P::Parameter, Dy::Dynamics, serial_num::Integer; Type::DataType, In_num::Integer)   #通过此函数得到交叉关联的波函数, 按理来说有多少个电子就应该有多少个坐标
+    P::Parameter, Dy::Dynamics, serial_num::Integer)   #通过此函数得到交叉关联的波函数, 按理来说有多少个电子就应该有多少个坐标
+    local In_num = Dy.In_num[serial_num]
     local Index = Dy.Index[serial_num]
+    local Type = eltype(Symmetric)
 
     local Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex} = (zeros(Type, In_num), zeros(Type, In_num))
     local Spin_Matrix::Matrix{<:Integer} = Spin_Effect(P, Dy, serial_num)
 
     for i in 1:In_num                                                             #这里的for 循环只对边界内电子的索引进行,上面的循环都要这样
-        Interpolation_Wave!(Index[i], serial_num, Vec_Wave, Vec_Derivate, P, Dy, Type = Type, In_num = In_num)             #这里应该改为在边界内对应的电子的行列式进行计算
+        Interpolation_Wave!(Index[i], serial_num, Vec_Wave, Vec_Derivate, P, Dy)             #这里应该改为在边界内对应的电子的行列式进行计算
 
         Symmetric[:, i] = Vec_Wave                                        #在Dy中加入一个Inbound来记录在边界内的索引
         Derivate[:, i] = Vec_Derivate
@@ -78,8 +83,9 @@ function Slater_determinant!(Symmetric::Matrix{<:Complex}, Derivate::Matrix{<:Co
 end
 
 
-function Velocity(P::Parameter, Dy::Dynamics, serial_num::Integer;
-    Type::DataType = eltype(eltype(Dy.Guide_Wave)), In_num::Integer)
+function Velocity(P::Parameter, Dy::Dynamics, serial_num::Integer)
+    local In_num = Dy.In_num[serial_num]
+    local Type = eltype(eltype(Dy.Guide_Wave))
 
     local symmetric_determinate, Derivate_eachcoodinate = (zeros(Type, (In_num, In_num)), zeros(Type, (In_num, In_num)))
     local Derivate_WaveFunc::Vector{<:Matrix{<:Complex}}
@@ -87,7 +93,7 @@ function Velocity(P::Parameter, Dy::Dynamics, serial_num::Integer;
 
     local Vector_velocity::Vector{<:AbstractFloat} = zeros(eltype(Dy.Trajectory), In_num)
 
-    Slater_determinant!(symmetric_determinate, Derivate_eachcoodinate, P, Dy, serial_num, Type = Type, In_num = In_num)
+    Slater_determinant!(symmetric_determinate, Derivate_eachcoodinate, P, Dy, serial_num)
 
     Derivate_WaveFunc = [deepcopy(symmetric_determinate) for i = 1:In_num]
     symmetric_WaveFunc = fill(symmetric_determinate, In_num)
@@ -102,18 +108,17 @@ function Velocity(P::Parameter, Dy::Dynamics, serial_num::Integer;
 end
 
 
-function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer, Vec_Trajectory::SubArray;
-    dt = P.Δt, In_num::Integer = Dy.In_num[serial_num])                     # 这里我们使用欧拉法即可
-
+function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer, Vec_Trajectory::SubArray)                     # 这里我们使用欧拉法即可
+    local In_num::Integer = Dy.In_num[serial_num]
     local Index = Dy.Index[serial_num]
     local OutBoundary_index::Vector{<:Integer} = Int64[]
 
-    local Total_time = P.step_t * real(dt)
+    local Total_time = P.step_t * real(P.Δt)
 
 
-    Vec_Trajectory[Index] .+= real(dt) * Velocity(P, Dy, serial_num, In_num = In_num)
+    Vec_Trajectory[Index] .+= real(P.Δt) * Velocity(P, Dy, serial_num)
 
-    if imag(dt) != 0.0                          #这一部分是为了在寻找基态的过程中避免quantum dift,使用线性衰减的随机数
+    if imag(P.Δt) != 0.0                          #这一部分是为了在寻找基态的过程中避免quantum dift,使用线性衰减的随机数
         Vec_Trajectory[Index] .+= 0.1 * thermalization(Dy.Time[serial_num], cut_off = Total_time) * (rand(In_num) .- 0.5)
     end
 
