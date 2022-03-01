@@ -27,7 +27,7 @@ function stitch(A::Vector, l_num::Int)                             # A的长度�
 end
 
 
-function stitch_Matrix(B::Array{T,3}, l_num::Int) where {T<:Complex{<:AbstractFloat}}
+function stitch_Matrix(B::Array{T,3}, l_num::Int) where {T<:Complex{<:AbstractFloat}}      #目的是将小的数组转换为Matrix{Vector}的结构
     local a, b, c = size(B)
     local Raw_Matrix::Matrix{<:Vector} = [zeros(eltype(B), l_num) for i in 1:b, j in 1:c]
 

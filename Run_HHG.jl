@@ -18,21 +18,21 @@ Raw_Array = reshape(complex(Matrix(@. abs(parse(Complex{Float64}, df[:, 1:Total_
 s_range = initial_range[end]
 s_num = length(initial_range)
 
-l_range = 150.0
+l_range = 200.0
 l_num = extend_num(s_range, l_range, s_num)
 
-P = Parameter{Float64,Int64}(space_N = l_num, scope = l_range, Δt = 0.05, step_t = 100)
+P = Parameter{Float64,Int64}(space_N = l_num, scope = l_range, Δt = 0.05, step_t = 10000)
 
 Raw_GuideWave = stitch_Matrix(Raw_Array, l_num)
 
-Dy = Dynamics{Float64}(Trajectory = tr, Guide_Wave = Raw_GuideWave, Displace = zeros(eltype(tr), (P.step_t + 1, Ensemble_num, Electron_num)),
+Dy = Dynamics{Float64}(Trajectory = tr, Guide_Wave = Raw_GuideWave, Displace = zeros(Float64, (P.step_t + 1, Ensemble_num, Electron_num)),
     Time = zeros(typeof(P.Δt), Ensemble_num));
 
-df = nothing
-Raw_DuideWave = nothing
-Raw_Array = nothing
-tr = nothing
-GC.gc()
+# df = nothing
+# Raw_DuideWave = nothing
+# Raw_Array = nothing
+# tr = nothing
+# GC.gc()
 
 parallel_Evolution!(P, Dy)
 

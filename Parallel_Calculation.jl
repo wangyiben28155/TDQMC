@@ -11,7 +11,7 @@ using ..TDQMC.Quantity
 using Base.Threads, SparseArrays, CSV, DataFrames
 
 
-function record_Ground(Dy::Dynamics)           #这个函数虽然和function_1里的函数同名但是作用域是隔离的
+function record_Trajectory(Dy::Dynamics)           #这个函数虽然和function_1里的函数同名但是作用域是隔离的
     local df = DataFrame(Dy.Trajectory, :auto)
 
     CSV.write("Ground_Trajectory.csv", df)
@@ -77,7 +77,7 @@ function parallel_CTE!(P::Parameter, Dy::Dynamics)
         Thread_workload[threadid()] += 1
         println(Thread_workload)
     end
-    record_Ground(Dy)
+    record_Trajectory(Dy)
     record_GuideWave(P, Dy)
     println("Complex Time Caiculation is over!")
 
