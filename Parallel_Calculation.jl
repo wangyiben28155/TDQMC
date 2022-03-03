@@ -28,14 +28,14 @@ function record_GuideWave(P::Parameter, Dy::Dynamics)       #上面这两个函�
     CSV.write("Ground_Guide_Wave.csv", df)
 end
 
-function record_Displace(P::Parameter, Dy::Dynamics)
+function record_Displace(P::Parameter, Dy::Dynamics, name::String)
     local a, b, c = size(Dy.Displace)
     local A = reshape(Dy.Displace, (a, b * c))
     local df = DataFrame(A, :auto)
 
     df.t_range = P.Δt * (0:P.step_t)
 
-    CSV.write("Displace_Ensemble.csv", df)
+    CSV.write(name, df)
 end
 
 function Fix_Matrix(P::Parameter)
@@ -60,7 +60,7 @@ function parallel_Evolution!(P::Parameter, Dy::Dynamics)
         Thread_workload[threadid()] += 1
         println(Thread_workload)
     end
-    record_Displace(P, Dy)
+    record_Displace(P, Dy, "Displace_Ensemble.csv")
     println("Real Time Caiculation is over!")
 
 end
@@ -77,6 +77,7 @@ function parallel_CTE!(P::Parameter, Dy::Dynamics)
         Thread_workload[threadid()] += 1
         println(Thread_workload)
     end
+    record_Displace(P, Dy, "Ground_Displace.csv")
     record_Trajectory(Dy)
     record_GuideWave(P, Dy)
     println("Complex Time Caiculation is over!")
