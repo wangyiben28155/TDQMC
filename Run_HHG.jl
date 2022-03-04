@@ -5,6 +5,10 @@ using .TDQMC
 
 using DataFrames, CSV
 
+using Dates
+
+tic = now()
+
 df = CSV.read("Ground_Guide_Wave.csv", DataFrame)
 tr = Matrix(CSV.read("Ground_Trajectory.csv", DataFrame))
 
@@ -12,8 +16,8 @@ Electron_num = size(tr, 1)
 Ensemble_num = size(tr, 2)
 Total_num = Electron_num * Ensemble_num
 
-initial_range = df[:, Total_num+1];                                                                     #最后一列保存的是空间的离散信息
-Raw_Array = reshape(complex(Matrix(@. abs(parse(Complex{Float64}, df[:, 1:Total_num])))), (3001, Electron_num, Ensemble_num));  # 500代表的是系综*电子数的数目,因为是单电子所以不需要reshape
+initial_range = df[:, Total_num+1]                                                                     #最后一列保存的是空间的离散信息
+Raw_Array = reshape(complex(Matrix(@. abs(parse(Complex{Float64}, df[:, 1:Total_num])))), (3001, Electron_num, Ensemble_num))  # 500代表的是系综*电子数的数目,因为是单电子所以不需要reshape
 
 s_range = initial_range[end]
 s_num = length(initial_range)
@@ -26,7 +30,7 @@ P = Parameter{Float64,Int64}(space_N = l_num, scope = l_range, Δt = 0.05, step_
 Raw_GuideWave = stitch_Matrix(Raw_Array, l_num)
 
 Dy = Dynamics{Float64}(Trajectory = tr, Guide_Wave = Raw_GuideWave, Displace = zeros(Float64, (P.step_t + 1, Ensemble_num, Electron_num)),
-    Time = zeros(typeof(P.Δt), Ensemble_num));
+    Time = zeros(typeof(P.Δt), Ensemble_num))
 
 # df = nothing
 # Raw_DuideWave = nothing
@@ -35,5 +39,9 @@ Dy = Dynamics{Float64}(Trajectory = tr, Guide_Wave = Raw_GuideWave, Displace = z
 # GC.gc()
 
 parallel_Evolution!(P, Dy)
+
+toc = now()
+
+println("$(convert(DateTime, toc-tic))")
 
 end

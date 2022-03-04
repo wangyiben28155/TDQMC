@@ -119,7 +119,7 @@ function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer, Vec_Trajecto
     Vec_Trajectory[Index] .+= real(P.Δt) * Velocity(P, Dy, serial_num)
 
     if imag(P.Δt) != 0.0                          #这一部分是为了在寻找基态的过程中避免quantum dift,使用线性衰减的随机数
-        Vec_Trajectory[Index] .+= 0.1 * thermalization(Dy.Time[serial_num], cut_off = Total_time) * (rand(In_num) .- 0.5)
+        Vec_Trajectory[Index] .+= 2.0 * real(P.Δt) * thermalization(Dy.Time[serial_num], cut_off = Total_time) * (rand(In_num) .- 0.5)
     end
 
     OutBoundary_index = findall(x -> abs(x) > P.scope, Vec_Trajectory)       #上面已经对粒子的位置进行了更新,
