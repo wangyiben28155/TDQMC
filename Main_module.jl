@@ -1,7 +1,7 @@
 module TDQMC
 
-export Dynamics, Parameter, extend_num, stitch_Matrix, parallel_Evolution!, parallel_CTE!, 
-        Group_Energy, HHG, choose
+export Dynamics, Parameter, extend_num, stitch_Matrix, parallel_Evolution!, parallel_CTE!,
+    Group_Energy, HHG, choose
 
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
 import Base.@kwdef
@@ -25,16 +25,16 @@ function generate_distribution(n::Int; μ::AbstractVector = μ, σ::AbstractVect
 end
 
 
-@kwdef mutable struct Dynamics{T<:AbstractFloat}
-    Trajectory::Matrix{T} = vcat(generate_distribution.(1:Electron_num)...)             #先给定一个初始的轨迹分布, 目前只是计算氢原子的情况,
+@kwdef mutable struct Dynamics{T1<:AbstractFloat,T2<:Integer}
+    Trajectory::Matrix{T1} = vcat(generate_distribution.(1:Electron_num)...)             #先给定一个初始的轨迹分布, 目前只是计算氢原子的情况,
     #并且之后代不同电子之间粒子的位置之间的运算会有矢量化运算, 所以将其放在列坐标加快运算 
-    Guide_Wave::Matrix{<:Vector{<:Complex{T}}} = [initializer_guideWave(i) for i in 1:Electron_num, j in 1:Ensemble_num]     #这里得到的分布是概率密度的开平方作为初始的波函数
+    Guide_Wave::Matrix{<:Vector{<:Complex{T1}}} = [initializer_guideWave(i) for i in 1:Electron_num, j in 1:Ensemble_num]     #这里得到的分布是概率密度的开平方作为初始的波函数
     #进行演化
-    Energy::Vector{T} = zeros(T, Ensemble_num)
-    Time::Vector{Union{T,Complex{T}}} = zeros(typeof(Δt), Ensemble_num)
-    Displace::Array{T,3} = zeros(T, (step_t+1, Ensemble_num, Electron_num))
-    Index::Vector{Vector{<:Integer}} = [Int64[0] for i in 1:Ensemble_num]                #在-P.scope到P.scope之内电子轨迹的索引
-    In_num::Vector{<:Integer} = ones(Int64, Ensemble_num)                              #边界内电子的数目
+    Energy::Vector{T1} = zeros(T1, Ensemble_num)
+    Time::Vector{Union{T1,Complex{T1}}} = zeros(typeof(Δt), Ensemble_num)
+    Displace::Array{T1,3} = zeros(T1, (step_t + 1, Ensemble_num, Electron_num))
+    Index::Vector{Vector{T2}} = [zeros(T2, Electron_num) for i in 1:Ensemble_num]                #在-P.scope到P.scope之内电子轨迹的索引
+    In_num::Vector{T2} = ones(T2, Ensemble_num)                              #边界内电子的数目
 end
 
 

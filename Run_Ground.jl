@@ -8,11 +8,11 @@ using Dates
 tic = now()
 
 P = Parameter{Float64,Int64}()
-Dy = Dynamics{Float64}()
+Dy = Dynamics{Float64,Int64}()
 
 parallel_CTE!(P, Dy)
 
-Sum_Energy = sum(Dy.Energy)/length(Dy.Energy)
+Sum_Energy = sum(Dy.Energy) / length(Dy.Energy)
 
 toc = now()
 

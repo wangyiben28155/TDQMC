@@ -29,14 +29,14 @@ P = Parameter{Float64,Int64}(space_N = l_num, scope = l_range, Δt = 0.05, step_
 
 Raw_GuideWave = stitch_Matrix(Raw_Array, l_num)
 
-Dy = Dynamics{Float64}(Trajectory = tr, Guide_Wave = Raw_GuideWave, Displace = zeros(Float64, (P.step_t + 1, Ensemble_num, Electron_num)),
+Dy = Dynamics{Float64,Int64}(Trajectory = deepcopy(tr), Guide_Wave = deepcopy(Raw_GuideWave), Displace = zeros(Float64, (P.step_t + 1, Ensemble_num, Electron_num)),
     Time = zeros(typeof(P.Δt), Ensemble_num))
 
-# df = nothing
-# Raw_DuideWave = nothing
-# Raw_Array = nothing
-# tr = nothing
-# GC.gc()
+df = nothing
+Raw_DuideWave = nothing
+Raw_Array = nothing
+tr = nothing
+GC.gc()
 
 parallel_Evolution!(P, Dy)
 

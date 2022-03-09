@@ -1,6 +1,6 @@
 module Trajectory
 
-export Movement!
+export Velocity!, Movement!
 
 using ..TDQMC
 using ..TDQMC.Find_nearest_k
@@ -11,15 +11,10 @@ using Interpolations, LinearAlgebra                                             
     return real(t) <= cut_off ?  amp * (1.0 - real(t) / cut_off) : 0.0
 end
 
-@inline function Spin_Effect(P::Parameter, Dy::Dynamics, serial_num::Integer)
-    local Select_Spin::Vector = P.Spin[Dy.Index[serial_num]]
-    local Spin_Effect::Matrix{<:Integer} = Select_Spin * Select_Spin'
-
-    replace!(tril!(Spin_Effect), 0 => 1)
-
-    return Spin_Effect
+@inline function Add_Spin!(Symmetric::Matrix{<:Complex}, Derivate::Matrix{<:Complex}; Spin_Matrix::Matrix{<:Integer})
+    Symmetric .*= Spin_Matrix
+    Derivate .*= Spin_Matrix
 end
-
 
 function find_lattice_wave!(localtion::AbstractFloat, serial_num::Integer,
     k_itp_Wave_Vector::Vector{<:Vector{<:Complex}}, P::Parameter, Dy::Dynamics;
@@ -68,7 +63,6 @@ function Slater_determinant!(Symmetric::Matrix{<:Complex}, Derivate::Matrix{<:Co
     local Type = eltype(Symmetric)
 
     local Vec_Wave::Vector{<:Complex}, Vec_Derivate::Vector{<:Complex} = (zeros(Type, In_num), zeros(Type, In_num))
-    local Spin_Matrix::Matrix{<:Integer} = Spin_Effect(P, Dy, serial_num)
 
     for i in 1:In_num                                                             #这里的for 循环只对边界内电子的索引进行,上面的循环都要这样
         Interpolation_Wave!(Index[i], serial_num, Vec_Wave, Vec_Derivate, P, Dy)             #这里应该改为在边界内对应的电子的行列式进行计算
@@ -77,46 +71,42 @@ function Slater_determinant!(Symmetric::Matrix{<:Complex}, Derivate::Matrix{<:Co
         Derivate[:, i] = Vec_Derivate
     end
 
-    Symmetric .*= Spin_Matrix
-    Derivate .*= Spin_Matrix
-
 end
 
 
-function Velocity(P::Parameter, Dy::Dynamics, serial_num::Integer)
+function Velocity!(P::Parameter, Dy::Dynamics, serial_num::Integer, Velocity_WaveFunc::Vector{Matrix{<:Complex}},
+    Vector_velocity::Vector{<:AbstractFloat}; Spin_Matrix::Matrix{<:Integer})
     local In_num = Dy.In_num[serial_num]
+    local Index = Dy.Index[serial_num]
     local Type = eltype(eltype(Dy.Guide_Wave))
 
     local symmetric_determinate, Derivate_eachcoodinate = (zeros(Type, (In_num, In_num)), zeros(Type, (In_num, In_num)))
-    local Derivate_WaveFunc::Vector{<:Matrix{<:Complex}}
-    local symmetric_WaveFunc::Vector{<:Matrix{<:Complex}}
-
-    local Vector_velocity::Vector{<:AbstractFloat} = zeros(eltype(Dy.Trajectory), In_num)
 
     Slater_determinant!(symmetric_determinate, Derivate_eachcoodinate, P, Dy, serial_num)
 
-    Derivate_WaveFunc = [deepcopy(symmetric_determinate) for i = 1:In_num]
-    symmetric_WaveFunc = fill(symmetric_determinate, In_num)
+    Add_Spin!(symmetric_determinate, Derivate_eachcoodinate, Spin_Matrix = Spin_Matrix)
+
+    Velocity_WaveFunc[Index] .= [deepcopy(symmetric_determinate) for i in 1:In_num]
 
     for i in 1:In_num
-        Derivate_WaveFunc[i][:, i] = Derivate_eachcoodinate[:, i]
+        Velocity_WaveFunc[Index[i]][:, i] = Derivate_eachcoodinate[:, i]
     end
 
-    Vector_velocity[:] = @. imag(det(Derivate_WaveFunc) / det(symmetric_WaveFunc))
+    Vector_velocity[Index] = imag.(det.(Velocity_WaveFunc[Index]) ./ det(symmetric_determinate))
 
-    return Vector_velocity
 end
 
 
-function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer, Vec_Trajectory::SubArray)                     # 这里我们使用欧拉法即可
-    local In_num::Integer = Dy.In_num[serial_num]
+function Movement!(P::Parameter, Dy::Dynamics, serial_num::Integer, Vec_Trajectory::SubArray;
+    Vector_velocity::Vector)                     # 这里我们使用欧拉法即可
+
+    local In_num = Dy.In_num[serial_num]
     local Index = Dy.Index[serial_num]
     local OutBoundary_index::Vector{<:Integer} = Int64[]
 
     local Total_time = P.step_t * real(P.Δt)
 
-
-    Vec_Trajectory[Index] .+= real(P.Δt) * Velocity(P, Dy, serial_num)
+    Vec_Trajectory[Index] .+= real(P.Δt) * Vector_velocity[Index]
 
     if imag(P.Δt) != 0.0                          #这一部分是为了在寻找基态的过程中避免quantum dift,使用线性衰减的随机数
         Vec_Trajectory[Index] .+= 2.0 * real(P.Δt) * thermalization(Dy.Time[serial_num], cut_off = Total_time) * (rand(In_num) .- 0.5)
