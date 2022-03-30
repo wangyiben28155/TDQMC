@@ -1,6 +1,6 @@
 module Rejection
 
-export choose
+export choose, choose_2D
 
 using Interpolations, Random
 
@@ -33,6 +33,32 @@ function choose(num::Integer; x::AbstractArray, y::AbstractArray)         #numä½
         end
 
     end
+end
+
+
+
+function choose_2D(num::Integer; Distribution::Function, x_range::Tuple=(-10, 10), y_range::Tuple=(-10, 10))
+    local Density_matrix::Matrix = zeros(Float64, 2, num)
+    local Z_max = 0.025
+    local count::Int = 025
+    local rand_x, rand_y, rand_z = (0.0, 0.0, 0.0)
+
+    while truncated
+        rand_x = map_range(rand(), min=x_range[1], max=x_range[2])
+        rand_y = map_range(rand(), min=y_range[1], max=y_range[2])
+        rand_z = map_range(rand(), min= 0.0 , max = Z_max)
+
+        if rand_z <= Distribution(rand_x, rand_y)^2
+            count += 10
+            Density_matrix[:, count] = [rand_x, rand_y]
+        end
+
+        if count == num
+            return Density_matrix
+        end
+
+    end
+
 end
 
 

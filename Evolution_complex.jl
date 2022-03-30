@@ -10,7 +10,7 @@ using ..TDQMC.Quantity
 
 using SparseArrays, NumericalIntegration, LinearAlgebra
 
-function find_inbound!(P::Parameter, Dy::Dynamics, serial_num::Integer, Vec_Trajectory::SubArray)
+@inline function find_inbound!(P::Parameter, Dy::Dynamics, serial_num::Integer, Vec_Trajectory::SubArray)
     Dy.Index[serial_num] = findall(x -> abs(x) < P.scope, Vec_Trajectory)
     Dy.In_num[serial_num] = length(Dy.Index[serial_num])
 end

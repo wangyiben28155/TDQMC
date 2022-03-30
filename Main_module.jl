@@ -6,18 +6,19 @@ export Dynamics, Parameter, extend_num, stitch_Matrix, parallel_Evolution!, para
 using Distributions, Random, SparseArrays                                   #用来初始化初始的波函数和系综粒子分布
 import Base.@kwdef
 
-const Ensemble_num, Electron_num = (500, 1)                                 #设定一些计算的参数
-const L, x_num, step_t, Δt = (30.0, 3001, 300, 0.05 - 0.05im)
-const μ, σ = (zeros(Float64, Electron_num), 1.5 * ones(Float64, Electron_num))       #这里考虑到自旋和导波函数的初始化,我们对每组系综中代表第n个电子的粒子进行轨迹的初始化的时候,导波函数应该不是相同的,否则斯莱特行列式会变成零
-const spin = [1]
+const Ensemble_num, Electron_num = (5000, 2)                                 #设定一些计算的参数
+const L, x_num, step_t, Δt = (30.0, 1501, 300, 0.05 - 0.05im)
+const μ, σ = ([-1, 1], [1, 1])       
+const a, b = (1.0, 1.0)       #软核势参数
+const spin = [1, -1]
 
 
-function initializer_guideWave(n::T; μ::AbstractVector = μ, σ::AbstractVector = σ) where {T<:Integer}                                           #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
+function initializer_guideWave(n::T; μ::AbstractVector=μ, σ::AbstractVector=σ) where {T<:Integer}                                           #这里因为算的是一维的波函数, 所以返回的矩阵为三维矩阵,第一维为波函数,第二维为系综粒子数,第三维为电子数
     return complex(sqrt.(pdf(Normal(μ[n], σ[n]), LinRange(-L, L, x_num))))
 end
 
 
-function generate_distribution(n::Int; μ::AbstractVector = μ, σ::AbstractVector = σ)
+function generate_distribution(n::Int; μ::AbstractVector=μ, σ::AbstractVector=σ)
     Random.seed!(n)                                                       #确定下一次使用rand函数的撒点是固定的, 每次调用程序也能保证下面的分布是确定的
     Initial_Distriution = rand(Normal(μ[n], σ[n]), Ensemble_num)                #将确定的撒点分布储存起来, 用于下面实例化的赋值
 

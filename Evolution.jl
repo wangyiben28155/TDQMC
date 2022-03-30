@@ -41,12 +41,12 @@ function damping!(Vec_wave::SubArray{<:Vector}, Index::Vector{<:Integer}, Absorb
     end
 end
 
+#计算的是某一个时刻的一组系综粒子的演化矩阵, 相当于对应每一个系综粒子的波函数, 这里使用的数据结构为对应每一个系综粒子, 每一个系综粒子有空间划分格点这么多的n×n的稀疏矩阵, 内部元素的非零元素的个数大概为3n
 
-function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int;
-    later_fix::SparseMatrixCSC, former_fix::SparseMatrixCSC)         #计算的是某一个时刻的一组系综粒子的演化矩阵, 相当于对应每一个系综粒子的波函数, 这里使用的数据结构为对应每一个系综粒子, 每一个系综粒子有空间划分格点这么多的n×n的稀疏矩阵, 内部元素的非零元素的个数大概为3n
+function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Integer;
+    later_fix::SparseMatrixCSC, former_fix::SparseMatrixCSC)         
 
-    local Change_matrix_former::Vector{<:SparseMatrixCSC} = [spzeros(eltype(later_fix), P.space_N, P.space_N) for i = 1:P.electron]     #这两个向量稀 
-    #疏矩阵用来计算的两个矩阵
+    local Change_matrix_former::Vector{<:SparseMatrixCSC} = [spzeros(eltype(later_fix), P.space_N, P.space_N) for i = 1:P.electron]     
     local Change_matrix_later::Vector{<:SparseMatrixCSC} = -deepcopy(Change_matrix_former)           #所有的元素取负值
 
     local Velocity_WaveFunc::Vector{Matrix{<:Complex}} = [zeros(eltype(later_fix), P.electron, P.electron) for i = 1:P.electron]
@@ -67,7 +67,8 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int;
 
     if imag(P.Δt) == 0.0
 
-        for i = 1:P.step_t
+        for i in 1:P.step_t
+
             record_Change = Dy.In_num[serial_num]
         
             find_inbound!(P, Dy, serial_num, Vec_Trajectory)
@@ -84,14 +85,14 @@ function CN_Evolution!(P::Parameter, Dy::Dynamics, serial_num::Int;
             Construct_matrix!(Dy, serial_num, later_fix, former_fix, Change_matrix_former, Change_matrix_later)
         
             Evolution!(Dy, serial_num, Vec_wave, Change_matrix_former, Change_matrix_later)
-
+        
             damping!(Vec_wave, Dy.Index[serial_num], Absorber)
-            
-            Velocity!(P, Dy, serial_num, Velocity_WaveFunc, Vector_velocity; Spin_Matrix = Spin_Matrix)  #重置速度向量,这里只对Index索引的更新速度
-            Movement!(P, Dy, serial_num, Vec_Trajectory, Vector_velocity = Vector_velocity)
+        
+            Velocity!(P, Dy, serial_num, Velocity_WaveFunc, Vector_velocity; Spin_Matrix=Spin_Matrix)  #重置速度向量,这里只对Index索引的更新速度
+            Movement!(P, Dy, serial_num, Vec_Trajectory, Vector_velocity=Vector_velocity)
         
             Dy.Time[serial_num] += P.Δt
-            Dy.Displace[i+1, serial_num, :] = Dy.Trajectory[:, serial_num]
+            Dy.Displace[i+1, serial_num, :] = Vec_Trajectory
         end
 
 
